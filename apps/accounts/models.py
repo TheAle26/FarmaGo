@@ -2,17 +2,21 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
+    username = None  # quitamos username
+    email = models.EmailField(unique=True)  # login con email
     activo = models.BooleanField(default=True)
 
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []  # antes estaba "username", lo sacamos
+
     def delete(self, *args, **kwargs):
-        # baja lógica
         self.activo = False
         self.is_active = False
         self.save()
 
     def hard_delete(self, *args, **kwargs):
-        # baja "fisica" 
         super().delete(*args, **kwargs)
+
 
 # Perfiles
 class Cliente(models.Model):
