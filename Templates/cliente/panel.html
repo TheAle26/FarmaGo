@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h5 m-0">Mis pedidos</h1>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="" onclick="location.reload();return false;">Actualizar</a>
+    <a class="btn btn-primary" href="{% url 'crear_pedido' %}">Crear pedido</a>
+  </div>
+</div>
+
+{% if pedidos %}
+  <div class="list-group">
+    {% for p in pedidos %}
+      <div class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="me-3">
+          <div class="fw-semibold">Pedido #{{ p.id }}</div>
+          <div class="text-muted small">
+            {{ p.creado|date:"d/m/Y H:i" }}
+            {% if p.farmacia %} • Farmacia: {{ p.farmacia.email|default:p.farmacia }}{% endif %}
+          </div>
+          {% if p.detalles %}
+            <div class="mt-1">{{ p.detalles }}</div>
+          {% endif %}
+        </div>
+        <span class="badge
+          {% if p.estado == 'PENDIENTE' %} text-bg-secondary
+          {% elif p.estado == 'ACEPTADO' %} text-bg-info
+          {% elif p.estado == 'EN_CAMINO' %} text-bg-warning
+          {% elif p.estado == 'ENTREGADO' %} text-bg-success
+          {% elif p.estado == 'RECHAZADO' %} text-bg-danger
+          {% else %} text-bg-light
+          {% endif %}
+        align-self-center">
+          {{ p.estado }}
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">Todavía no tenés pedidos.</div>
+  <a class="btn btn-primary" href="{% url 'crear_pedido' %}">Crear mi primer pedido</a>
+{% endif %}
+{% endblock %}
