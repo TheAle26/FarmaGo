@@ -15,6 +15,9 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        def __str__(self):
+            # Usar el email en lugar del username
+            return f"Usuario: {self.user.email}"
         return user
 
     def create_superuser(self, email, password, **extra_fields):
@@ -51,6 +54,10 @@ class User(AbstractUser):
 
     def hard_delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
+    
+    def __str__(self):
+        # Usar el email en lugar del username
+        return f"Usuario: {self.user.email}"
 
 
 # Perfiles
@@ -60,7 +67,7 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"Cliente: {self.user.username}"
+        return f"Cliente: {self.user.email}"
 
 class Farmacia(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
@@ -78,4 +85,4 @@ class Repartidor(models.Model):
     valido = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Repartidor: {self.user.username}"
+        return f"Repartidor: {self.user.email}"
