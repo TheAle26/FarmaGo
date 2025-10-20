@@ -1,13 +1,48 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+
+class CustomUserManager(BaseUserManager):
+    """
+    Administrador de usuarios personalizado donde el email es el identificador único
+    para autenticación en lugar del username.
+    """
+    
+    def create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("El Email debe ser configurado")
+        
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password, **extra_fields):
+        # Asegúrate de que las banderas de permiso estén en True
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("activo", True) # Tu campo personalizado
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser debe tener is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser debe tener is_superuser=True.")
+            
+        # Llamamos a create_user, que ya no requiere 'username'
+        return self.create_user(email, password, **extra_fields)
+
 
 class User(AbstractUser):
-    #username = None  # quitamos username
-    email = models.EmailField(unique=True)  # login con email
+    username = None 
+    email = models.EmailField(unique=True)
     activo = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []  # antes estaba "username", lo sacamos
+    REQUIRED_FIELDS = []
+
+    # AÑADE ESTO:
+    objects = CustomUserManager() # Usar el manager personalizado
 
     def delete(self, *args, **kwargs):
         self.activo = False
