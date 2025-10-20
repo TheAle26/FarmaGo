@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-    username = None  # quitamos username
+    #username = None  # quitamos username
     email = models.EmailField(unique=True)  # login con email
     activo = models.BooleanField(default=True)
 
