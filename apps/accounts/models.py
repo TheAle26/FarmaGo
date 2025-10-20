@@ -31,6 +31,7 @@ class Farmacia(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
     nombre_farmacia = models.CharField(max_length=100)
     direccion_farmacia = models.CharField(max_length=255)
+    valido = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Farmacia: {self.nombre_farmacia}"
@@ -39,6 +40,7 @@ class Repartidor(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
     vehiculo = models.CharField(max_length=50)
     disponible = models.BooleanField(default=True)
+    valido = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Repartidor: {self.user.username}"
