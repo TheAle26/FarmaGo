@@ -17,7 +17,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         def __str__(self):
             # Usar el email en lugar del username
-            return f"Usuario: {self.user.email}"
+            return f"Usuario: {self.email}"
         return user
 
     def create_superuser(self, email, password, **extra_fields):
@@ -57,7 +57,7 @@ class User(AbstractUser):
     
     def __str__(self):
         # Usar el email en lugar del username
-        return f"Usuario: {self.user.email}"
+        return f"Usuario: {self.email}"
 
 
 # Perfiles
