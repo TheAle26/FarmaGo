@@ -52,8 +52,13 @@ def registro_cliente(request):
         user = form.save()  # crea User (email + pass)
         Cliente.objects.create(
             user=user,
+            nombre=form.cleaned_data["nombre"],
+            apellido=form.cleaned_data["apellido"],
+            documento=form.cleaned_data["documento"], # Campo faltante que causa el error
+            edad=form.cleaned_data["edad"],         # Campo faltante
             direccion=form.cleaned_data["direccion"],
             telefono=form.cleaned_data["telefono"],
+            terms_cond=form.cleaned_data["terms_cond"], # Campo faltante
         )
         messages.success(request, "Cuenta de cliente creada.")
         login(request, user)  # opcional: auto-login
