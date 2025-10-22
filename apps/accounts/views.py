@@ -61,17 +61,23 @@ def registro_cliente(request):
     return render(request, "registro_form.html", {"form": form, "titulo": "Registro Cliente"})
 
 def registro_farmacia(request):
-    form = RegistroFarmaciaForm(request.POST or None)
+    form = RegistroFarmaciaForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        Farmacia.objects.create(
+        user = form.save() ##
+        obras_sociales_seleccionadas=form.cleaned_data.pop("obras_sociales")
+        farmacia = Farmacia.objects.create(
             user=user,
-            nombre_farmacia=form.cleaned_data["nombre_farmacia"],
-            direccion_farmacia=form.cleaned_data["direccion_farmacia"],
+            nombre=form.cleaned_data["nombre"],
+            direccion=form.cleaned_data["direccion"],
+            cuit=form.cleaned_data["cuit"],
+            cbu=form.cleaned_data["cbu"],
+            documentacion=form.cleaned_data["documentacion"],
+            acepta_tyc=form.cleaned_data["acepta_tyc"],
+            valido=False,     
         )
-        messages.success(request, "Cuenta de farmacia creada.")
-        login(request, user)
-        return redirect("farmacia_panel")
+        farmacia.obras_sociales.set(obras_sociales_seleccionadas)
+        messages.success(request, "Cuenta de farmacia creada. Quedará pendiente de validación por un administrador.")
+        return redirect("login")       
     return render(request, "registro_form.html", {"form": form, "titulo": "Registro Farmacia"})
 
 def registro_repartidor(request):

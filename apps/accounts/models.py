@@ -59,6 +59,12 @@ class User(AbstractUser):
         # Usar el email en lugar del username
         return f"Usuario: {self.email}"
 
+# Modelo para obras sociales
+class ObraSocial(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return f"Obra social: {self.nombre}"
 
 # Perfiles
 class Cliente(models.Model):
@@ -71,12 +77,17 @@ class Cliente(models.Model):
 
 class Farmacia(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
-    nombre_farmacia = models.CharField(max_length=100)
-    direccion_farmacia = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=255)
+    cuit = models.CharField(max_length=13, unique=True, default='00-00000000-0')
+    cbu = models.CharField(max_length=22, default='000000000000000000000') 
+    obras_sociales = models.ManyToManyField(ObraSocial, blank=True, related_name="farmacias")
+    documentacion = models.FileField(upload_to='documentacion_farmacias/', null=True, blank=False)
+    acepta_tyc = models.BooleanField(default=False)
     valido = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Farmacia: {self.nombre_farmacia}"
+        return f"Farmacia: {self.nombre}"
 
 class Repartidor(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
@@ -86,3 +97,4 @@ class Repartidor(models.Model):
 
     def __str__(self):
         return f"Repartidor: {self.user.email}"
+

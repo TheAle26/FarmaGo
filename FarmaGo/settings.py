@@ -138,3 +138,11 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+# Configuración para la subida de archivos
+# Carpeta donde se almacenarán los archivos subidos (ej. imágenes, documentos).
+# Se creará una carpeta 'media' en la raíz de tu proyecto.
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# URL para acceder a los archivos multimedia desde el navegador.
+MEDIA_URL = '/media/'
