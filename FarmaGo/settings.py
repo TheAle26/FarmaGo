@@ -136,5 +136,5 @@ STATIC_URL = "static/"  # ya debería estar
 import os
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "cliente_panel"   # o una vista genérica de home
+LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"

@@ -24,12 +24,14 @@
 <ul class="navbar-nav ms-auto">
   {% if user.is_authenticated %}
     <li class="nav-item">
-      <a class="nav-link" href="/accounts/profile/">Ir a perfil</a>
+      <a class="nav-link btn btn-link p-15 text-white" href="/accounts/profile/">Ir a perfil</a>
     </li>
-    <li class="nav-item">
+    
+    <li class="nav-item d-flex align-items-center">
         <form action="{% url 'logout' %}" method="post" class="d-inline">
           {% csrf_token %}
-          <button type="submit" class="nav-link btn btn-link p-0" style="text-decoration:none;">
+          
+          <button type="submit" class="nav-link btn btn-link p-0 text-white" style="text-decoration:none;">
             Salir
           </button>
         </form>
@@ -46,6 +48,19 @@
     </div>
   </div>
 </nav>
+{% comment %} para el mensajito de alertas {% endcomment %}
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+    {% for message in messages %}
+        <div id="toast-{{ forloop.counter }}" class="toast align-items-center text-bg-{{ message.tags }} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 
 <!-- Contenedor con padding adecuado en móvil -->
 <main class="container py-3 py-md-4">
@@ -59,6 +74,23 @@
   </div>
 </footer>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Selecciona todos los elementos con la clase 'toast' (los mensajes de Django)
+        const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        
+        // Itera sobre ellos y los inicializa/muestra
+        toastElList.map(function(toastEl) {
+            // Inicializa el objeto Toast de Bootstrap
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 7000 // Ocultar después de 7 segundos
+            });
+            // Muestra la Toast
+            toast.show();
+        });
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

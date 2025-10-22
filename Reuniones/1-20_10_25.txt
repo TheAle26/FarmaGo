@@ -1,0 +1,17 @@
+Lenguaje de Desarrollo: Python con Framework Django
+Historias de Usuario (HU) Iniciales: Se definieron y priorizaron 4 historias para el Módulo de Autenticación/Registro.
+
+En qué se estuvo trabajando el equipo? 
+No hubo trabajo de desarrollo previo. La reunión se centró en la planificación, la definición de la tecnologia a usar y la asignación de las primeras Historias de Usuario para dar inicio al Sprint.
+
+En qué se va a trabajar posteriormente?
+
+[Alejo] (SM)	Iniciar Sesión y Cerrar Sesión	
+Amalia		Registrarse como Farmacia	
+Ezequiel	Registrarse como Cliente	
+Mateo		Registrarse como Repartidor
+
+Que problemas se presentaron?
+No se tenia el software necesario descargado
+
+

@@ -2,15 +2,49 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import login, logout
 from .forms import (RegistroClienteForm, RegistroFarmaciaForm, RegistroRepartidorForm)
 from .models import Cliente, Farmacia, Repartidor
 
-# si preferís las genéricas:
-login_view = LoginView.as_view(template_name="login.html")
+
+class CustomLoginView(LoginView):
+    success_url = None
+    template_name = "login.html" 
+    #redirect_authenticated_user = True 
+
+    def get_success_url(self):
+        user = self.request.user
+        if hasattr(user, 'cliente'):
+            return redirect("cliente_panel").url
+        
+        elif hasattr(user, 'farmacia'):
+            farmacia = user.farmacia  
+            if farmacia.valido:
+                return redirect("farmacia_panel").url
+            else:
+                logout(self.request) 
+                messages.error(self.request, "¡Acceso denegado! Tu perfil de Farmacia aún no ha sido validado por el administrador.")
+                return redirect("login").url 
+        
+        
+        elif hasattr(user, 'repartidor'):
+            repartidor = user.repartidor 
+            if repartidor.valido:
+                return redirect("repartidor_panel").url
+            else:
+                logout(self.request) 
+                messages.error(self.request, "¡Acceso denegado! Tu perfil de Repartidor aún no ha sido validado por el administrador.")
+                return redirect("login").url
+        
+        # 4. DEFAULT
+        return super().get_success_url()
+   
+login_view = CustomLoginView.as_view()
 logout_view = LogoutView.as_view()
 
 def registro_selector(request):
     return render(request, "registro_selector.html")
+
 
 def registro_cliente(request):
     form = RegistroClienteForm(request.POST or None)

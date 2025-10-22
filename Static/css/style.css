@@ -1,0 +1,16 @@
+/* Esto asegura que la Toast tenga un ancho completo en móviles (hasta 576px) */
+@media (max-width: 576px) {
+    .toast-container {
+        /* Fija la toast al borde inferior izquierdo */
+        left: 0 !important; 
+        right: 0 !important;
+        /* Asegura que no haya padding lateral para que ocupe todo el ancho */
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .toast {
+        /* Hace que la toast ocupe el 100% del ancho del contenedor */
+        width: 100% !important; 
+        border-radius: 0; /* Opcional: elimina las esquinas redondeadas */
+    }
+}
