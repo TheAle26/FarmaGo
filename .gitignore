@@ -1,3 +1,5 @@
+/apps/accounts/__pycache__
+*.sqlite3
 /apps/__pycache__
 /apps/accounts/__pycache__
 /apps/accounts/migrations/__pycache__
