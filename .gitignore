@@ -2,3 +2,11 @@
 *.sqlite3
 /apps/__pycache__
 *.jpg
+
+# Ignorar migraciones compiladas y cache de Python
+__pycache__/
+*.pyc
+
+# Ignorar migraciones de Django
+apps/*/migrations/*.pyc
+apps/*/migrations/__pycache__/
