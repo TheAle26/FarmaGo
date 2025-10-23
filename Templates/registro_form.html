@@ -4,7 +4,19 @@
     <div class="card-body">
       <h1 class="h5 mb-3 text-center">{{ titulo }}</h1>
       <form method="post" novalidate enctype="multipart/form-data">
-        {% csrf_token %} {{ form|crispy }}
+        {% csrf_token %}
+
+        <!-- Renderiza la mayoría de los campos con Crispy -->  
+        {% for field in form %}
+          {% if field.name != 'latitud' and field.name != 'longitud' %}
+            {{ field|as_crispy_field }}
+          {% endif %}
+        {% endfor %}
+
+        <!-- RENDERIZA LOS CAMPOS OCULTOS -->
+        {{ form.latitud }}
+        {{ form.longitud }}
+
         <button class="btn btn-primary w-100" type="submit">
           Crear cuenta
         </button>
@@ -15,4 +27,49 @@
     </div>
   </div>
 </div>
-{% endblock %}
+{% endblock %} {% block extra_js %}
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJjJoiU22eLqz-02a6dYUdKQbGazSlwoc&libraries=places&callback=initAutocomplete"
+  async
+  defer
+></script>
+
+<!-- API GOOGLE MAPS -->
+<script>
+  function initAutocomplete() {
+    // 1. Selecciona el campo de dirección
+    // Usamos el ID que definimos en el formulario: 'id_direccion_autocomplete'
+    const addressInput = document.getElementById("id_direccion_autocomplete");
+
+    // 2. Crea el objeto de autocompletado
+    const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+      componentRestrictions: { country: "ar" }, // Restringe a Argentina
+      fields: ["address_components", "geometry", "icon", "name"], // Pide la geometría
+    });
+
+    // 3. Añade un listener para cuando el usuario selecciona una dirección
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+
+      if (!place.geometry || !place.geometry.location) {
+        // El usuario escribió algo que no está en Google
+        console.warn("Dirección no encontrada en Google Maps.");
+        return;
+      }
+
+      // 4. Obtiene la latitud y longitud
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+
+      // 5. Puebla los campos ocultos del formulario
+      // Crispy-forms les da los IDs 'id_latitud' y 'id_longitud'
+      document.getElementById("id_latitud").value = lat.toFixed(6);
+      document.getElementById("id_longitud").value = lng.toFixed(6);
+
+      console.log("Dirección seleccionada:", place.name);
+      console.log("Latitud:", lat.toFixed(6));
+      console.log("Longitud:", lng.toFixed(6));
+    });
+  }
+</script>
+{% endblock extra_js %}

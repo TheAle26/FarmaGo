@@ -41,12 +41,31 @@ class RegistroClienteForm(BaseRegistroForm):
 
 class RegistroFarmaciaForm(BaseRegistroForm):
     nombre = forms.CharField(max_length=100, label="Nombre de la farmacia")
-    direccion = forms.CharField(max_length=255, label = "Dirección de la farmacia")
+
+    direccion = forms.CharField(
+        max_length=255, 
+        label="Dirección de la Sucursal",
+        widget=forms.TextInput(attrs={'id': 'id_direccion_autocomplete'})
+    )
+
     cuit = forms.CharField(max_length=13, label="CUIT", help_text="Formato XX-XXXXXXXX-X")
     cbu = forms.CharField(max_length=22, label="CBU de la farmacia")
     obras_sociales = forms.ModelMultipleChoiceField(queryset=ObraSocial.objects.all(), widget = forms.CheckboxSelectMultiple, required=False, label="Obras Sociales Aceptadas")
     documentacion = forms.FileField(label="Documentación de la farmacia", validators = [FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'png'])], help_text="Archivos permitidos: PDF, JPG, PNG.")
     acepta_tyc = forms.BooleanField(label="Acepto los términos y condiciones y la Política de Privacidad.", required=True, error_messages={'required': 'Debes aceptar los términos y condiciones para registrarte.'})
+
+    latitud = forms.DecimalField(
+        widget=forms.HiddenInput(), 
+        required=False, 
+        max_digits=9, 
+        decimal_places=6
+    )
+    longitud = forms.DecimalField(
+        widget=forms.HiddenInput(), 
+        required=False, 
+        max_digits=9, 
+        decimal_places=6
+    )
 
     def clean_cuit(self):
         cuit = self.cleaned_data.get('cuit')
