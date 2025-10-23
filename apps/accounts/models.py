@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+
 class CustomUserManager(BaseUserManager):
     """
     Administrador de usuarios personalizado donde el email es el identificador único
@@ -69,8 +70,13 @@ class ObraSocial(models.Model):
 # Perfiles
 class Cliente(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=30)
+    apellido = models.CharField(max_length=30)
+    documento = models.IntegerField(unique=True)
+    edad = models.IntegerField()
     direccion = models.CharField(max_length=255)
     telefono = models.CharField(max_length=20)
+    terms_cond = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Cliente: {self.user.email}"
