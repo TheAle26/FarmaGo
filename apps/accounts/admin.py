@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin # Renombramos el original para no confundir
-from .models import User, Cliente, Farmacia, Repartidor 
+from .models import User, Cliente, Farmacia, Repartidor, ObraSocial
 
 
 class CustomUserAdmin(BaseUserAdmin):
@@ -65,3 +65,4 @@ admin.site.register(User, CustomUserAdmin)
 admin.site.register(Cliente)
 admin.site.register(Farmacia)
 admin.site.register(Repartidor)
+admin.site.register(ObraSocial)

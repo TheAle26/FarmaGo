@@ -85,6 +85,20 @@ class Farmacia(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE)
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=255)
+
+    latitud = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True
+    )
+    longitud = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True
+    )
+
     cuit = models.CharField(max_length=13, unique=True, default='00-00000000-0')
     cbu = models.CharField(max_length=22, default='000000000000000000000') 
     obras_sociales = models.ManyToManyField(ObraSocial, blank=True, related_name="farmacias")

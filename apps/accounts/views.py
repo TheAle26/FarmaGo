@@ -74,6 +74,8 @@ def registro_farmacia(request):
             user=user,
             nombre=form.cleaned_data["nombre"],
             direccion=form.cleaned_data["direccion"],
+            latitud=form.cleaned_data.get("latitud"),
+            longitud=form.cleaned_data.get("longitud"),
             cuit=form.cleaned_data["cuit"],
             cbu=form.cleaned_data["cbu"],
             documentacion=form.cleaned_data["documentacion"],
