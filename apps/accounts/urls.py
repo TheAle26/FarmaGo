@@ -10,4 +10,5 @@ urlpatterns = [
     path("registro/cliente/", views.registro_cliente, name="registro_cliente"),
     path("registro/farmacia/", views.registro_farmacia, name="registro_farmacia"),
     path("registro/repartidor/", views.registro_repartidor, name="registro_repartidor"),
+    path("registro/terminos_y_condiciones", views.tyc, name="tyc"),
 ]

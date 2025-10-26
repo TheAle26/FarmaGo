@@ -4,8 +4,9 @@ from . import views
 urlpatterns = [
     # Cliente
     path("cliente/", views.cliente_panel, name="cliente_panel"),
-    path("cliente/crear/", views.crear_pedido, name="crear_pedido"),
-
+    path("cliente/carrito/", views.ver_carrito, name="ver_carrito"),
+    path("cliente/carrito/finalizar_compra", views.finalizar_compra_view, name="finalizar_compra"),
+    
     # Farmacia
     path("farmacia/", views.farmacia_panel, name="farmacia_panel"),
     path("farmacia/aceptar/<int:pedido_id>/", views.farmacia_aceptar, name="farmacia_aceptar"),

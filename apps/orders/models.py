@@ -92,7 +92,7 @@ class Pedido(models.Model):
     # El cliente SÍ es el User base
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="pedidos_cliente")
     
-    # RECOMENDACIÓN: Vincula al perfil 'Farmacia', no al 'User' genérico
+
     farmacia = models.ForeignKey(
         Farmacia,  # <-- Vinculado al perfil Farmacia
         on_delete=models.SET_NULL, 
@@ -101,7 +101,7 @@ class Pedido(models.Model):
         related_name="pedidos_farmacia"
     )
     
-    # RECOMENDACIÓN: Vincula al perfil 'Repartidor'
+ 
     repartidor = models.ForeignKey(
         Repartidor, # <-- Vinculado al perfil Repartidor
         on_delete=models.SET_NULL, 
@@ -110,7 +110,7 @@ class Pedido(models.Model):
         related_name="pedidos_repartidor"
     )
     
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='PENDIENTE')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='CARRITO')
     detalles = models.TextField(blank=True, help_text="Notas adicionales del cliente")
     creado = models.DateTimeField(auto_now_add=True)
     
@@ -147,7 +147,13 @@ class DetallePedido(models.Model):
     
     # Qué precio total tiene esta línea (cantidad * precio_unitario)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
-
+    
+    receta_adjunta = models.FileField(
+            upload_to='recetas_pedidos/', 
+            null=True, 
+            blank=True
+        )
+    
     class Meta:
         verbose_name = "Detalle de Pedido"
         verbose_name_plural = "Detalles de Pedidos"

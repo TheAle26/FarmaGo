@@ -1,0 +1,3 @@
+id,user_id,nombre,direccion,valido,cuit
+1,2,Farmacia Central,Plaza Principal 100,True,30-11111111-1
+2,5,Farmacia Sur,Avenida del Sur 550,False,30-22222222-2

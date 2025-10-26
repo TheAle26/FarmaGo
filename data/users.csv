@@ -1,0 +1,6 @@
+id,email,password,first_name,last_name
+1,cliente1@farmago.com,pass123,Juan,Perez
+2,farmacia1@farmago.com,pass123,Ana,Gomez
+3,repartidor1@farmago.com,pass123,Carlos,Ruiz
+4,cliente2@farmago.com,pass123,Maria,Lopez
+5,farmacia2@farmago.com,pass123,Luis,Martin

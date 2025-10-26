@@ -1,0 +1,5 @@
+id,nombre_comercial,principio_activo,concentracion,requiere_receta
+1,Ibuprofeno 600,Ibuprofeno,600mg,False
+2,Paracetamol 500,Paracetamol,500mg,False
+3,Amoxicilina 875,Amoxicilina,875mg,True
+4,Tafirol 1g,Paracetamol,1g,False

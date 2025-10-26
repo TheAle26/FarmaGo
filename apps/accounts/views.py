@@ -45,6 +45,8 @@ logout_view = LogoutView.as_view()
 def registro_selector(request):
     return render(request, "registro_selector.html")
 
+def tyc(request):
+    return render(request, "tyc.html")
 
 def registro_cliente(request):
     form = RegistroClienteForm(request.POST or None)

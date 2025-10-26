@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mi Carrito de Compras</h2>
+
+    <form action="{% url 'finalizar_compra' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for farmacia_data in carrito_data.farmacias %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3>Pedido a: {{ farmacia_data.nombre_farmacia }}</h3>
+                </div>
+                
+                <ul class="list-group list-group-flush">
+                    {% for item in farmacia_data.items_enriquecidos %}
+                        <li class="list-group-item">
+                            {{ item.cantidad }}x {{ item.stock_obj.medicamento.nombre_comercial }}
+                            
+                            {% if item.stock_obj.medicamento.requiere_receta %}
+                                <div class="mt-2 p-2 alert alert-warning">
+                                    <label for="receta_{{ item.stock_obj.id }}" class="form-label">
+                                        <strong>Requiere Receta:</strong> Subir foto o PDF
+                                    </label>
+                                    <input type="file" 
+                                           class="form-control form-control-sm" 
+                                           name="receta_{{ item.stock_obj.id }}" 
+                                           accept="image/*,.pdf" 
+                                           required>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="card-footer">
+                    <strong>Subtotal Farmacia: ${{ farmacia_data.subtotal }}</strong>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info" role="alert">Tu carrito está vacío.</div>
+        {% endfor %}
+
+        {% if total_general > 0 %}
+            <div class="text-end">
+                <h3>Total General: ${{ total_general }}</h3>
+                
+                <button type="submit" class="btn btn-success btn-lg">
+                    Finalizar Compra y Realizar Pedidos
+                </button>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock content %}
