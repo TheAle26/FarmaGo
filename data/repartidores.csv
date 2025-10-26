@@ -1,2 +1,3 @@
-id,user_id,vehiculo,valido
-1,3,Moto Honda 150,True
+id,user_id,cuit,vehiculo,patente,valido
+1,3,20-11111111-1,moto,A123BCD,True
+2,6,20-22222222-2,bicicleta,,False

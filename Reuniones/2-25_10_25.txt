@@ -1,0 +1,24 @@
+
+En qué se estuvo trabajando el equipo? 
+Alejo:	Inicar y cerrar session con cualquier tipo de cuenta
+Amalia:	Registrarse como Farmacia.
+Ezequiel: Desarrollo del formulario de registro de una cuenta de tipo cliente. 
+Mateo: Desarrollo del formulario de registro de una cuenta de tipo Repartidor. 
+
+
+Que problemas se presentaron?
+Alejo: Problemas con GitHub y la base de datos debido a las modificaciones de las tablas
+Amalia: Problemas de configuración con la API de google maps. Lo pudo solucionar.
+Ezequiel: No supe implementar una ventana emergente que muestre terminos y condiciones.
+Mateo: Problemas para implementar el pedido de los antecedentes penales como imagen.
+
+En qué se va a trabajar posteriormente?
+
+[Alejo] (SM)	Verificar como administrador farmacias y repartidores. Solucionar lo de git y lo de terminus y condiciones
+Amalia		Modificar el inventario de medicamentos de la farmacia
+Ezequiel	Buscar medicamentos como cliente
+Mateo		Ver los pedidos disponibles como repartidos. Solucionar el problena de carga de imagen
+
+
+
+

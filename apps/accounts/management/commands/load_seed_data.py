@@ -99,10 +99,21 @@ class Command(BaseCommand):
             reader = csv.DictReader(file)
             for row in reader:
                 user = User.objects.get(id=row['user_id'])
+                
+                # Manejar la patente (puede estar vacía si es 'bicicleta')
+                patente_val = row['patente'] if row['patente'] else None
+                
                 Repartidor.objects.create(
                     id=row['id'],
                     user=user,
-                    vehiculo=row['vehiculo'],
+                    cuit=row['cuit'], # <-- AÑADIDO
+                    vehiculo=row['vehiculo'], # <-- VALOR CORREGIDO
+                    patente=patente_val, # <-- AÑADIDO
+                    
+                    # 💥 SOLUCIÓN para ImageField obligatorio 💥
+                    # Asignamos una ruta ficticia para satisfacer 'null=False'
+                    antecedentes='antecedentes_repartidores/dummy_seed.png', 
+                    
                     disponible=True,
                     valido=row['valido'].lower() == 'true'
                 )
