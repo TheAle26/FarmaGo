@@ -5,6 +5,7 @@ from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm
 from django.db import transaction
+from django.db.models import F
 from django.contrib import messages
 from django.db.models import Case, When
 
@@ -235,14 +236,16 @@ def farmacia_rechazar(request, pedido_id):
 def repartidor_panel(request):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
     disponibles = Pedido.objects.filter(estado="ACEPTADO", repartidor__isnull=True)
-    mis = Pedido.objects.filter(repartidor=request.user).exclude(estado__in=["ENTREGADO","RECHAZADO"])
+    # Usar la instancia `Repartidor` asociada al user
+    mis = Pedido.objects.filter(repartidor=request.user.repartidor).exclude(estado__in=["ENTREGADO","RECHAZADO"])
     return render(request, "repartidor/panel.html", {"disponibles": disponibles, "mis": mis})
 
 @login_required
 def repartidor_tomar(request, pedido_id):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
     p = get_object_or_404(Pedido, id=pedido_id, estado="ACEPTADO", repartidor__isnull=True)
-    p.repartidor = request.user
+    # asignar la instancia Repartidor relacionada al user, no el User
+    p.repartidor = request.user.repartidor
     p.estado = "EN_CAMINO"
     p.save()
     return redirect("repartidor_panel")
@@ -250,7 +253,7 @@ def repartidor_tomar(request, pedido_id):
 @login_required
 def repartidor_entregado(request, pedido_id):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
-    p = get_object_or_404(Pedido, id=pedido_id, repartidor=request.user, estado="EN_CAMINO")
+    p = get_object_or_404(Pedido, id=pedido_id, repartidor=request.user.repartidor, estado="EN_CAMINO")
     p.estado = "ENTREGADO"
     p.save()
     return redirect("repartidor_panel")

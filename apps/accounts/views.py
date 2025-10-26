@@ -90,12 +90,16 @@ def registro_farmacia(request):
     return render(request, "registro_form.html", {"form": form, "titulo": "Registro Farmacia"})
 
 def registro_repartidor(request):
-    form = RegistroRepartidorForm(request.POST or None)
+    form = RegistroRepartidorForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
-        Repartidor.objects.create(
+        repartidor = Repartidor.objects.create(
             user=user,
-            vehiculo=form.cleaned_data["vehiculo"],
+            cuit=form.cleaned_data.get("cuit"),
+            cbu=form.cleaned_data.get("cbu"),
+            vehiculo=form.cleaned_data.get("vehiculo"),
+            patente=form.cleaned_data.get("patente"),
+            antecedentes=form.cleaned_data.get("antecedentes"),
         )
         messages.success(request, "Cuenta de repartidor creada.")
         login(request, user)

@@ -32,7 +32,9 @@
     </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJjJoiU22eLqz-02a6dYUdKQbGazSlwoc&libraries=places&callback=initAutocomplete"
   async
@@ -77,4 +79,55 @@
     });
   }
 </script>
-{% endblock extra_js %}
+
+<script>
+  // Formatea CUIT en tiempo real: XX-XXXXXXXX-X
+  function formatCUITInput(el) {
+    if (!el) return;
+    el.addEventListener('input', function (e) {
+      const cursorPos = el.selectionStart;
+      // Mantener solo dígitos
+      let digits = el.value.replace(/\D/g, '').slice(0, 11);
+      let formatted = '';
+      if (digits.length <= 2) {
+        formatted = digits;
+      } else if (digits.length <= 10) {
+        formatted = digits.slice(0,2) + '-' + digits.slice(2);
+      } else {
+        formatted = digits.slice(0,2) + '-' + digits.slice(2,10) + '-' + digits.slice(10);
+      }
+      el.value = formatted;
+
+      // ajustar posición del cursor al final (evita complejidades de offsets)
+      el.selectionStart = el.selectionEnd = el.value.length;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const cuitInput = document.getElementById('id_cuit') || document.querySelector('input[name="cuit"]');
+    formatCUITInput(cuitInput);
+  });
+</script>
+
+<script>
+  // Enforce digits-only on CBU input and optionally set a maxlength
+  function enforceDigitsOnly(el, maxLength) {
+    if (!el) return;
+    // set maxlength attribute so the browser also limits input length
+    if (maxLength) el.setAttribute('maxlength', maxLength);
+    el.addEventListener('input', function () {
+      // keep only digits and trim to maxLength
+      const digits = el.value.replace(/\D/g, '').slice(0, maxLength || undefined);
+      el.value = digits;
+      // move cursor to the end to avoid complex offset handling
+      el.selectionStart = el.selectionEnd = el.value.length;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const cbuInput = document.getElementById('id_cbu') || document.querySelector('input[name="cbu"]');
+    // CBU debe tener exactamente 22 dígitos; limitamos a 22 en el campo
+    enforceDigitsOnly(cbuInput, 22);
+  });
+</script>
+{% endblock %}
