@@ -47,10 +47,10 @@
                     <tr>
                         <td>{{ item.medicamento.nombre_comercial }}</td>
                         <td>{{ item.medicamento.concentracion }}</td>
-                        <form method="post" action="{% url 'modificar_stock' item.id %}" class="d-inline">
+                        <form method="post" action="{% url 'editar_stock' item.id %}" class="d-inline">
                             {% csrf_token %}
                             <td>
-                                <input type="number" step="0.01" name="precio" value="{{ edit_form.precio.value|default:item.precio|stringformat:\".2f\" }}"
+                                <input type="number" step="0.01" name="precio" value="{{ edit_form.precio.value|default:item.precio|stringformat:'.2f' }}"
                                        class="form-control form-control-sm {% if editing_item_id == item.id and edit_form.precio.errors %}is-invalid{% endif %}"
                                        min="0.01" required id="id_precio_{{ item.id }}">
                                 {% if editing_item_id == item.id %}

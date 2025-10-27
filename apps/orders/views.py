@@ -197,7 +197,7 @@ def farmacia_panel(request):
     ).order_by('prioridad_estado', 'creado') # Ordena por prioridad, y luego por fecha
 
     # Pasa la lista completa y ordenada a la plantilla
-    return render(request, "farmacia/panel.html", {"pedidos": pedidos_ordenados})
+    return render(request, "farmacia/farmacia_panel.html", {"pedidos": pedidos_ordenados})
 
 @login_required
 def farmacia_aceptar(request, pedido_id):
@@ -237,6 +237,8 @@ def farmacia_gestionar_inventario(request):
         return HttpResponseForbidden("Solo farmacias")
     farmacia = request.user.farmacia
     stock_items = StockMedicamento.objects.filter(farmacia=farmacia).select_related('medicamento').order_by('medicamento__nombre_comercial')
+    add_form = AddStockMedicamentoForm(farmacia=farmacia)
+    edit_form = EditStockMedicamentoForm()
     if request.method == 'POST':
         # Procesar el formulario para AÑADIR un nuevo medicamento al stock
         add_form = AddStockMedicamentoForm(farmacia, request.POST)
@@ -275,7 +277,7 @@ def farmacia_gestionar_inventario(request):
         'add_form': add_form,
         'edit_form': edit_form, # Usaremos este mismo form para editar en la misma página
     }
-    return render(request, "farmacia/gestionar_inventario.html", {"stock_items": stock_items})
+    return render(request, "farmacia/inventario.html", {"stock_items": stock_items})
 
 @login_required
 def farmacia_editar_stock(request, stock_id):
