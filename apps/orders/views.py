@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
-from .forms import PedidoForm
-from django.db import transaction
+from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm
+from django.db import transaction, IntegrityError
 from django.db.models import F
 from django.contrib import messages
 from django.db.models import Case, When
@@ -230,6 +230,83 @@ def farmacia_rechazar(request, pedido_id):
     pedido.save()
     
     return redirect("farmacia_panel")
+
+@login_required
+def farmacia_gestionar_inventario(request):
+    if not es_farmacia(request.user): 
+        return HttpResponseForbidden("Solo farmacias")
+    farmacia = request.user.farmacia
+    stock_items = StockMedicamento.objects.filter(farmacia=farmacia).select_related('medicamento').order_by('medicamento__nombre_comercial')
+    if request.method == 'POST':
+        # Procesar el formulario para AÑADIR un nuevo medicamento al stock
+        add_form = AddStockMedicamentoForm(farmacia, request.POST)
+        if add_form.is_valid():
+            medicamento = add_form.cleaned_data['medicamento']
+            precio = add_form.cleaned_data['precio']
+            stock = add_form.cleaned_data['stock_actual']
+
+            try:
+                # Crear el nuevo registro de stock
+                StockMedicamento.objects.create(
+                    farmacia=farmacia,
+                    medicamento=medicamento,
+                    precio=precio,
+                    stock_actual=stock
+                )
+                messages.success(request, f"Se agregó {medicamento.nombre_comercial} al inventario.")
+                return redirect('gestionar_inventario') # Redirigir para limpiar el form
+            except IntegrityError: # Por si acaso intenta agregar uno que ya existe (aunque el form lo evita)
+                messages.error(request, f"{medicamento.nombre_comercial} ya existe en tu inventario.")
+            except Exception as e:
+                 messages.error(request, f"Ocurrió un error al agregar el medicamento: {e}")
+
+        else:
+            # Si el form de añadir no es válido, mostramos los errores
+             messages.error(request, "Error al agregar el medicamento. Revisa los datos ingresados.")
+             edit_form = EditStockMedicamentoForm() # Formulario vacío para editar (contexto)
+
+    else:
+        # Si es GET, mostramos un formulario vacío para añadir
+        add_form = AddStockMedicamentoForm(farmacia=farmacia)
+        edit_form = EditStockMedicamentoForm() # También para el contexto inicial
+
+    context = {
+        'stock_items': stock_items,
+        'add_form': add_form,
+        'edit_form': edit_form, # Usaremos este mismo form para editar en la misma página
+    }
+    return render(request, "farmacia/gestionar_inventario.html", {"stock_items": stock_items})
+
+@login_required
+def farmacia_editar_stock(request, stock_id):
+    if not es_farmacia(request.user): 
+        return HttpResponseForbidden("Solo farmacias")
+    farmacia = request.user.farmacia
+    stock_item = get_object_or_404(StockMedicamento, id=stock_id, farmacia=farmacia)
+
+    if request.method == 'POST':
+        edit_form = EditStockMedicamentoForm(request.POST, instance=stock_item)
+        if edit_form.is_valid():
+            edit_form.save()
+            messages.success(request, f"Se actualizó el stock de {stock_item.medicamento.nombre_comercial}.")
+        else:
+            # Si hay errores en el form de edición, volvemos a mostrar la página de inventario
+            # con los errores en el formulario de edición.
+            messages.error(request, f"Error al actualizar {stock_item.medicamento.nombre_comercial}. Revisa los datos.")
+            farmacia_actual = request.user.farmacia
+            stock_items = StockMedicamento.objects.filter(farmacia=farmacia_actual).select_related('medicamento').order_by('medicamento__nombre_comercial')
+            add_form = AddStockMedicamentoForm(farmacia=farmacia_actual) # Necesario para re-renderizar
+
+            context = {
+                'stock_items': stock_items,
+                'add_form': add_form,
+                'edit_form': edit_form, # Pasamos el form con errores
+                'editing_item_id': stock_id # Para saber qué item se estaba editando
+            }
+            return render(request, 'farmacia/inventario.html', context)
+
+    # Si es GET, redirigimos a la página principal de inventario (la edición se hace in-place)
+    return redirect('gestionar_inventario')
 
 # ---------- REPARTIDOR ----------
 @login_required

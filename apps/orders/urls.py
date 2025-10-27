@@ -11,6 +11,8 @@ urlpatterns = [
     path("farmacia/", views.farmacia_panel, name="farmacia_panel"),
     path("farmacia/aceptar/<int:pedido_id>/", views.farmacia_aceptar, name="farmacia_aceptar"),
     path("farmacia/rechazar/<int:pedido_id>/", views.farmacia_rechazar, name="farmacia_rechazar"),
+    path("farmacia/inventario/", views.farmacia_gestionar_inventario, name="gestionar_inventario"),
+    path("farmacia/inventario/modificar/<int:stock_id>/", views.farmacia_editar_stock, name="editar_stock"),
 
     # Repartidor
     path("repartidor/", views.repartidor_panel, name="repartidor_panel"),
