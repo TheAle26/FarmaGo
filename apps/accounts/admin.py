@@ -1,10 +1,11 @@
+# apps/accounts/admin.py
+
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin # Renombramos el original para no confundir
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Cliente, Farmacia, Repartidor, ObraSocial
 
-
+# --- 1. ADMIN DE USUARIO (Ya estaba bien) ---
 class CustomUserAdmin(BaseUserAdmin):
-    # Campos que se mostrarán en la lista (QUITAMOS USERNAME)
     list_display = (
         "email", 
         "first_name", 
@@ -12,19 +13,14 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff", 
         "activo"
     )
-    # Filtros para la lista
     list_filter = (
         "is_staff", 
         "is_superuser", 
         "is_active", 
         "activo"
     )
-    # Campos de búsqueda
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
-
-    # El campo 'fieldsets' define el formulario de EDICIÓN.
-    # Quitamos 'username' y añadimos 'activo'
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Información personal", {"fields": ("first_name", "last_name", "activo")}),
@@ -42,27 +38,50 @@ class CustomUserAdmin(BaseUserAdmin):
         ),
         ("Fechas importantes", {"fields": ("last_login", "date_joined")}),
     )
-    
-    # IMPORTANTE: add_fieldsets define el formulario de CREACIÓN.
-    # Debes quitar la referencia a 'username' y asegurar que solo pida 'email', 
-    # 'password', y 'password2' (si tienes 'password2' en tu add form)
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password', 'password2'), # Asegúrate de que 'password2' esté disponible si lo usas.
+            'fields': ('email', 'password', 'password2'),
         }),
     )
-    
-    # También debemos especificar los campos a mostrar/editar en el formulario de agregar/cambiar
-    # para que no busque el 'username'
-    filter_horizontal = ('groups', 'user_permissions',) # Necesario para la vista de permisos
-
-# ----------------------------------------------
-# 2. Registrar los modelos
-# ----------------------------------------------
+    filter_horizontal = ('groups', 'user_permissions',)
 
 admin.site.register(User, CustomUserAdmin)
+
+
+# --- 2. ADMIN DE PERFILES (Aquí está la solución) ---
+
+# Registro simple para Cliente y ObraSocial (no pediste filtros para estos)
 admin.site.register(Cliente)
-admin.site.register(Farmacia)
-admin.site.register(Repartidor)
 admin.site.register(ObraSocial)
+
+# Decorador para registrar el modelo Farmacia con su clase Admin personalizada
+@admin.register(Farmacia)
+class FarmaciaAdmin(admin.ModelAdmin):
+    # Columnas que se ven en la lista
+    list_display = ('nombre', 'user', 'cuit', 'valido')
+    
+    # 💥 AÑADE EL FILTRO POR EL CAMPO 'valido' 💥
+    list_filter = ('valido',)
+    
+    # (Opcional) Para poder buscar farmacias
+    search_fields = ('nombre', 'cuit', 'user__email')
+    
+    # (Opcional) Para poder validar/invalidar desde la lista
+    list_editable = ('valido',)
+
+# Decorador para registrar el modelo Repartidor con su clase Admin personalizada
+@admin.register(Repartidor)
+class RepartidorAdmin(admin.ModelAdmin):
+    # Columnas que se ven en la lista
+    list_display = ('__str__', 'vehiculo', 'disponible', 'valido')
+    
+    # 💥 AÑADE EL FILTRO POR EL CAMPO 'valido' (y otros útiles) 💥
+    list_filter = ('valido', 'disponible', 'vehiculo')
+    
+    # (Opcional) Para poder buscar repartidores
+    search_fields = ('user__email', 'cuit', 'patente')
+    
+    # (Opcional) Para poder validar/invalidar y marcar disponible
+    list_editable = ('disponible', 'valido')
+
