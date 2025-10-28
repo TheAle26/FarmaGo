@@ -356,6 +356,17 @@ def repartidor_entregado(request, pedido_id):
     p.save()
     return redirect("repartidor_panel")
 
+def repartidor_ver_pedidos(request):
+    # chequeo instancia Repartidor
+    if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
+
+    # se puede chequear aqui que no tenga un pedido en curso si se quiere.
+    """if Pedido.objects.filter(repartidor=request.user.repartidor, estado="EN_CAMINO").exists():
+        messages.warning(request, "Tienes un pedido en curso.")
+        return redirect("repartidor_panel")"""
+
+    pedidos = Pedido.objects.filter(estado="ACEPTADO").order_by("creado")
+    return render(request, "repartidor/pedidos.html", {"pedidos": pedidos})
 
 #---------------------pedido----------------
 

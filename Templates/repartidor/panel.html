@@ -1,4 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-panel del Rapartidor
+<div class="container mt-4">
+	<h1 class="h5 mb-3">Panel del Repartidor</h1>
+
+	<div class="mb-3">
+		<a href="{% url 'repartidor_pedidos' %}" class="btn btn-primary">Pedidos disponibles</a>
+	</div>
+
+	<p>panel del Rapartidor</p>
+</div>
 {% endblock %}
