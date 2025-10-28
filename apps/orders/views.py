@@ -296,7 +296,7 @@ def farmacia_gestionar_inventario(request):
         'add_form': add_form,
         'edit_form': edit_form, # Usaremos este mismo form para editar en la misma página
     }
-    return render(request, "farmacia/inventario.html", {"stock_items": stock_items})
+    return render(request, "farmacia/inventario.html", context)
 
 @login_required
 def farmacia_editar_stock(request, stock_id):
