@@ -117,12 +117,21 @@ def finalizar_compra_view(request):
         
         for farmacia_id, farmacia_data in carrito['farmacias'].items():
             farmacia_obj = get_object_or_404(Farmacia, id=farmacia_id)
-            
+
+            # No permitir compras a farmacias que no estén validadas
+            if not getattr(farmacia_obj, 'valido', False):
+                raise Exception(f"No es posible comprar a la farmacia '{farmacia_obj.nombre}' porque no está validada.")
+
+            # Asegurarse de enlazar el perfil Cliente (no el User)
+            cliente_profile = getattr(request.user, 'cliente', None)
+            if cliente_profile is None:
+                raise Exception("Debe iniciar sesión como cliente para finalizar la compra.")
+
             nuevo_pedido = Pedido.objects.create(
-                cliente=request.user,
+                cliente=cliente_profile,
                 farmacia=farmacia_obj,
                 estado='PENDIENTE', 
-                total=farmacia_data['subtotal']
+                total=farmacia_data.get('subtotal', 0)
             )
             
             # Iterar sobre los items de la sesión
@@ -184,10 +193,20 @@ def finalizar_compra_view(request):
 def farmacia_panel(request):
     if not es_farmacia(request.user): 
         return HttpResponseForbidden("Solo farmacias")
+    # En el panel principal solo mostramos acciones rápidas y enlaces
+    # La lista de pedidos se muestra en la vista dedicada 'farmacia_pedidos'
+    return render(request, "farmacia/farmacia_panel.html")
 
-    todos_los_pedidos = Pedido.objects.filter(
-        farmacia=request.user.farmacia
-    )
+
+@login_required
+def farmacia_pedidos_entrantes(request):
+    """Vista dedicada para que la farmacia vea sus pedidos (entrantes).
+    Muestra todos los pedidos de la farmacia, priorizando los pendientes.
+    """
+    if not es_farmacia(request.user):
+        return HttpResponseForbidden("Solo farmacias")
+
+    todos_los_pedidos = Pedido.objects.filter(farmacia=request.user.farmacia)
 
     pedidos_ordenados = todos_los_pedidos.annotate(
         prioridad_estado=Case(
@@ -197,7 +216,7 @@ def farmacia_panel(request):
     ).order_by('prioridad_estado', 'creado') # Ordena por prioridad, y luego por fecha
 
     # Pasa la lista completa y ordenada a la plantilla
-    return render(request, "farmacia/farmacia_panel.html", {"pedidos": pedidos_ordenados})
+    return render(request, "farmacia/pedidos_entrantes.html", {"pedidos": pedidos_ordenados})
 
 @login_required
 def farmacia_aceptar(request, pedido_id):
@@ -350,4 +369,20 @@ def crear_pedido(request):
         p.save()
         return redirect("cliente_panel")
     return render(request, "cliente/crearPedido.html", {"form": form})
+
+
+#---------- Panel redirect ----------
+
+
+@login_required
+def panel_principal(request):
+    if es_cliente(request.user):
+        return redirect("cliente_panel")
+    elif es_farmacia(request.user):
+        return redirect("farmacia_panel")
+    elif es_repartidor(request.user):
+        return redirect("repartidor_panel")
+    else:
+        return HttpResponseForbidden("Perfil no reconocido.")
+
 

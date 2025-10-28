@@ -5,36 +5,11 @@
 
     <div class="mb-3">
         <a href="{% url 'gestionar_inventario' %}" class="btn btn-info">Gestionar Inventario</a>
-        </div>
-
-    <hr>
-
-    <h2 class="h6 mb-3">Pedidos Pendientes</h2>
-    {% comment %} Tu código existente para mostrar pedidos pendientes {% endcomment %}
-    {% for p in pedidos %}
-        {% if p.estado == 'PENDIENTE' %}
-            <div class="card mb-2">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        Pedido #{{ p.id }} de {{ p.cliente.user.email }}
-                        <small class="d-block text-muted">{{ p.creado|date:"d/m H:i" }}</small>
-                    </div>
-                    <div>
-                        <form action="{% url 'farmacia_aceptar' p.id %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
-                        </form>
-                        <form action="{% url 'farmacia_rechazar' p.id %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    {% empty %}
-        <p class="text-muted">No hay pedidos pendientes.</p>
-    {% endfor %}
+        <a href="{% url 'farmacia_pedidos' %}" class="btn btn-primary">Pedidos entrantes</a>
 
     </div>
+
+</div>
+
+    {# La lista de pedidos ahora está en la vista dedicada 'Pedidos entrantes' #}
 {% endblock %}

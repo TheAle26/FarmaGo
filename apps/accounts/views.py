@@ -5,6 +5,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login, logout
 from .forms import (RegistroClienteForm, RegistroFarmaciaForm, RegistroRepartidorForm)
 from .models import Cliente, Farmacia, Repartidor
+from django.urls import reverse
+
 
 
 class CustomLoginView(LoginView):
@@ -14,7 +16,11 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         user = self.request.user
-        if hasattr(user, 'cliente'):
+        # Si el usuario tiene permisos de staff o es superuser, redirige al admin
+        if getattr(user, 'is_superuser'):
+            return reverse('admin:index')
+        
+        elif hasattr(user, 'cliente'):
             return redirect("cliente_panel").url
         
         elif hasattr(user, 'farmacia'):
@@ -35,6 +41,7 @@ class CustomLoginView(LoginView):
                 logout(self.request) 
                 messages.error(self.request, "¡Acceso denegado! Tu perfil de Repartidor aún no ha sido validado por el administrador.")
                 return redirect("login").url
+        
         
         # 4. DEFAULT
         return super().get_success_url()
@@ -101,7 +108,9 @@ def registro_repartidor(request):
             patente=form.cleaned_data.get("patente"),
             antecedentes=form.cleaned_data.get("antecedentes"),
         )
-        messages.success(request, "Cuenta de repartidor creada.")
-        login(request, user)
-        return redirect("repartidor_panel")
+        messages.success(request, "Cuenta de repartidor creada. Quedará pendiente de validación por un administrador.")
+        return redirect("login")
     return render(request, "registro_form.html", {"form": form, "titulo": "Registro Repartidor"})
+
+
+
