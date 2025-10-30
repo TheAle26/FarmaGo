@@ -68,6 +68,23 @@
         {% endfor %}
 
         {% if total_general > 0 %}
+        <div class="row justify-content-end mb-4">
+                <div class="col-lg-8">
+                    <h4>Dirección de Entrega</h4>
+                    <p class="text-muted small">
+                        Verifica tu dirección. Puedes cambiarla solo para este pedido.
+                    </p>
+                    <div class="mb-3">
+                        <label for="direccion_entrega" class="form-label">Enviar a:</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="direccion_entrega" 
+                               name="direccion_entrega" 
+                               value="{{ default_direccion|default:'' }}" 
+                               required>
+                    </div>
+                </div>
+            </div>
             <div class="text-end">
                 <h3>Total General: ${{ total_general }}</h3>
                 <button type="submit" class="btn btn-success btn-lg">

@@ -20,6 +20,7 @@
             {{ p.creado|date:"d/m/Y H:i" }}
             {% if p.farmacia %} • {{ p.farmacia.email|default:p.farmacia }}{% endif %}
           </div>
+          Enviado a {{ p.direccion }}
           {% if p.detalles %}
             <div class="mt-1">{{ p.detalles }}</div>
           {% endif %}
