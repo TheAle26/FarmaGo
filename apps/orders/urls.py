@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import MedicamentoDetailView
 
 urlpatterns = [
     # Cliente
@@ -7,6 +8,7 @@ urlpatterns = [
     path("cliente/carrito/", views.ver_carrito, name="ver_carrito"),
     path("cliente/carrito/finalizar_compra", views.finalizar_compra_view, name="finalizar_compra"),
     path('buscar/medicamentos/', views.buscar_medicamentos, name='buscar_medicamentos'),
+    path('medicamento/<int:pk>/', MedicamentoDetailView.as_view(), name='medicamento_detalle'),
     
     # Farmacia
     path("farmacia/", views.farmacia_panel, name="farmacia_panel"),

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Medicamento
+from django.views.generic import DetailView
 from apps.accounts.models import ObraSocial
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm
@@ -10,7 +11,13 @@ from django.db.models import F
 from django.contrib import messages
 from django.db.models import Case, When
 from django.shortcuts import render
+from django.http import JsonResponse
 
+
+class MedicamentoDetailView(DetailView):
+    model = Medicamento
+    template_name = 'cliente/medicamento_detalle.html' 
+    context_object_name = 'medicamento'
 
 # ---------- CLIENTE ----------
 @login_required
