@@ -1,11 +1,11 @@
-id,cliente_id,farmacia_id,repartidor_id,estado,total
-1,1,1,1,EN_CAMINO,1601.00
-2,2,2,,PENDIENTE,400.00
-3,1,2,,ENTREGADO,360.00
-4,3,1,2,ENTREGADO,1250.50
-5,4,2,3,EN_CAMINO,3200.00
-6,2,1,,PENDIENTE,850.00
-7,3,2,,CANCELADO,2100.75
-8,1,1,1,ENTREGADO,500.00
-9,4,1,2,EN_CAMINO,980.20
-10,2,2,3,ENTREGADO,1500.00
+id,cliente_id,farmacia_id,repartidor_id,estado,total,direccion
+1,1,1,1,EN_CAMINO,1601.00,Mi casa
+2,2,2,,PENDIENTE,400.00,Su casa
+3,1,2,,ENTREGADO,360.00, casa 3
+4,3,1,2,ENTREGADO,1250.50, casa del cliente 3
+5,4,2,3,EN_CAMINO,3200.00, casa de un amnigi
+6,2,1,,PENDIENTE,850.00, av 7 435
+7,3,2,,CANCELADO,2100.75, calle 4 456
+8,1,1,1,ENTREGADO,500.00,calle 32 444
+9,4,1,2,EN_CAMINO,980.20,calle libertador 1234
+10,2,2,3,ENTREGADO,1500.00,Facultad de artes

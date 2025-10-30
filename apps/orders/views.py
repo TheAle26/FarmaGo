@@ -198,7 +198,9 @@ def remove_cart_item(request, stock_id_str):
 @login_required
 def ver_carrito(request):
     carrito_session = request.session.get('carrito', {'farmacias': {}})
-    
+    default_direccion = ""
+    if hasattr(request.user, 'cliente'):
+        default_direccion = request.user.cliente.direccion
     total_general_str = carrito_session.get('total_general', '0.0')
 
     carrito_contexto = {
@@ -242,7 +244,8 @@ def ver_carrito(request):
     context = {
         'carrito_data': carrito_contexto,
         'total_general': carrito_contexto['total_general'],
-        'hay_items_con_receta': hay_items_con_receta 
+        'hay_items_con_receta': hay_items_con_receta,
+        'default_direccion': default_direccion
     }
     
     return render(request, 'cliente/carrito_detalle.html', context)
@@ -262,7 +265,10 @@ def finalizar_compra_view(request):
     if not carrito or not carrito.get('farmacias'):
         messages.error(request, "Tu carrito está vacío.")
         return redirect('ver_carrito')
-
+    direccion_validada = request.POST.get('direccion_entrega')
+    if not direccion_validada:
+        messages.error(request, "Por favor, completa la dirección de entrega.")
+        return redirect('ver_carrito')
     try:
         pedidos_creados = []
         
@@ -282,7 +288,8 @@ def finalizar_compra_view(request):
                 cliente=cliente_profile,
                 farmacia=farmacia_obj,
                 estado='PENDIENTE', 
-                total=farmacia_data.get('subtotal', 0)
+                total=farmacia_data.get('subtotal', 0),
+                direccion=direccion_validada
             )
             
             # Iterar sobre los items de la sesión

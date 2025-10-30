@@ -116,7 +116,7 @@ class Pedido(models.Model):
     
     # Es útil tener un total en el pedido principal
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
+    direccion = models.CharField(max_length=255)
     def __str__(self):
         return f"Pedido #{self.id} - Estado: {self.get_estado_display()}"
 
