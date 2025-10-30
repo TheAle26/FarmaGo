@@ -16,7 +16,7 @@
                     <option value="">Filtrar por Obra Social (Todas)</option>
                     {% for os in obras_sociales %}
                         <option value="{{ os.id }}" 
-                            {% if request.GET.obra_social_id|lower == os.id|stringformat:"s" %}selected{% endif %}>
+                                {% if selected_obra_social == os.id %}selected{% endif %}>
                             {{ os.nombre }}
                         </option>
                     {% endfor %}
@@ -31,19 +31,34 @@
 
     <hr>
 
-    {% if medicamentos %}
+    {% if medicamentos_stock %}
         <div class="list-group">
-            {% for med in medicamentos %}
+            
+            {% for stock in medicamentos_stock %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>{{ med.nombre_comercial }}</strong> - ${{ med.precio }}
-                        <p class="text-muted small mb-0">Principio Activo: {{ med.principio_activo }}</p>
+                        <strong>{{ stock.medicamento.nombre_comercial }}</strong> - 
+                        <span class="text-success fw-bold">${{ stock.precio }}</span>
+                        
+                        <p class="text-muted small mb-0">
+                            Principio Activo: {{ stock.medicamento.principio_activo }} <br>
+                            Vendido por: <strong>{{ stock.farmacia.nombre }}</strong>
+                        </p>
                     </div>
-                    <a href="{% url 'medicamento_detalle' pk=med.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                    
+                    <form action="{% url 'buscar_medicamentos' %}?{{ request.GET.urlencode }}" method="post">
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="stock_id" value="{{ stock.id }}">
+                        
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Agregar al Carrito
+                        </button>
+                    </form>
                 </div>
             {% endfor %}
         </div>
-    {% elif query or request.GET.obra_social_id %}
+    {% elif query or selected_obra_social %}
         <div class="alert alert-warning">No se encontraron medicamentos para su búsqueda o filtros.</div>
     {% else %}
         <div class="alert alert-info">Utilice la barra de búsqueda y los filtros para encontrar medicamentos.</div>

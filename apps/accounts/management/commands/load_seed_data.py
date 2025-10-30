@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction
 
 # Importa todos tus modelos
-from apps.accounts.models import User, Cliente, Farmacia, Repartidor
+from apps.accounts.models import User, Cliente, Farmacia, Repartidor,ObraSocial
 from apps.orders.models import Medicamento, StockMedicamento, Pedido, DetallePedido
 
 # Define la RUTA a tus archivos CSV
@@ -23,6 +23,7 @@ class Command(BaseCommand):
 
         # El orden es crucial debido a las Foreign Keys
         self.load_users()
+        self.load_obras_sociales()
         self.load_medicamentos()
         self.load_clientes()
         self.load_farmacias()
@@ -30,6 +31,8 @@ class Command(BaseCommand):
         self.load_stock()
         self.load_pedidos()
         self.load_detalles()
+        self.load_farmacia_obras_sociales()
+        
 
         self.stdout.write(self.style.SUCCESS('¡Carga de datos completada!'))
 
@@ -166,4 +169,32 @@ class Command(BaseCommand):
                     # 💥 CONVERTIR A NÚMEROS 💥
                     cantidad=int(row['cantidad']),
                     precio_unitario_snapshot=float(row['precio_unitario_snapshot'])
+                )
+                
+    def load_obras_sociales(self):
+        self.stdout.write('Cargando Obras Sociales...')
+        with open(os.path.join(DATA_DIR, 'obras_sociales.csv'), 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                ObraSocial.objects.create(
+                    id=row['id'],
+                    nombre=row['nombre']
+                )
+                
+    def load_farmacia_obras_sociales(self):
+        self.stdout.write('Cargando relaciones Farmacia-ObraSocial...')
+        
+        # ¡Importante! Esta es la forma de obtener el modelo
+        # de la tabla intermedia automática de Django.
+        # Asumimos que el campo en tu modelo Farmacia se llama 'obras_sociales'
+        ThroughModel = Farmacia.obras_sociales.through
+        
+        with open(os.path.join(DATA_DIR, 'farmacia_obrasocial.csv'), 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                # Creamos la relación usando los IDs directamente
+                ThroughModel.objects.create(
+                    id=row['id'],
+                    farmacia_id=row['farmacia_id'],
+                    obrasocial_id=row['obrasocial_id']
                 )

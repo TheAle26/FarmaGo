@@ -1,3 +1,7 @@
 id,user_id,nombre,apellido,documento,edad,direccion,telefono
 1,1,Juan,Perez,30123456,40,Calle Falsa 123,555-1111
 2,4,Maria,Lopez,35789012,28,Avenida Siempre 742,555-2222
+3,7,Carlos,Gomez,28456789,55,Boulevard 51 890,555-3333
+4,10,Ana,Martinez,40123456,22,Plaza Roca 30,555-4444
+5,13,Lucia,Fernandez,32890123,34,Calle 45 1120,555-5555
+6,16,Pedro,Rodriguez,25111222,62,Diagonal 77 450,555-6666

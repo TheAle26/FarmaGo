@@ -3,3 +3,11 @@ id,nombre_comercial,principio_activo,concentracion,requiere_receta
 2,Paracetamol 500,Paracetamol,500mg,False
 3,Amoxicilina 875,Amoxicilina,875mg,True
 4,Tafirol 1g,Paracetamol,1g,False
+5,Aspirina 500,Ácido acetilsalicílico,500mg,False
+6,Losartán 50,Losartán Potásico,50mg,True
+7,Diazepam 10,Diazepam,10mg,True
+8,Benadryl Jarabe,Difenhidramina,12.5mg/5ml,False
+9,Reliveran Gotas,Metoclopramida,0.5%,True
+10,Macril,Betametasona/Gentamicina,0.1%/0.1%,True
+11,Ibuprofeno 400,Ibuprofeno,400mg,False
+12,Amoxicilina 500 Jarabe,Amoxicilina,500mg/5ml,True

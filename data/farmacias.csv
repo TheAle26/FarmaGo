@@ -1,3 +1,6 @@
 id,user_id,nombre,direccion,valido,cuit
 1,2,Farmacia Central,Plaza Principal 100,True,30-11111111-1
 2,5,Farmacia Sur,Avenida del Sur 550,False,30-22222222-2
+3,8,Farmacia Norte,Calle Falsa 123,True,30-33333333-3
+4,11,Farmacia Oeste,Boulevard 44,True,30-44444444-4
+5,14,Farmacia Nueva Era,Diagonal 74 1520,True,30-55555555-5

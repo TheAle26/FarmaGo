@@ -1,3 +1,4 @@
+import decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
@@ -7,7 +8,7 @@ from apps.accounts.models import ObraSocial
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm
 from django.db import transaction, IntegrityError
-from django.db.models import F
+from django.db.models import F,Q
 from django.contrib import messages
 from django.db.models import Case, When
 from django.shortcuts import render
@@ -27,54 +28,183 @@ def cliente_panel(request):
     return render(request, "cliente/panel.html", {"pedidos": pedidos})
 
 # orders/views.py
+def _recalculate_cart_totals(carrito_sesion):
+    """
+    Recalcula todos los subtotales y el total general del carrito en la sesión.
+    También añade una clave 'subtotal' a CADA item.
+    """
+    total_general = decimal.Decimal('0.0')
+    
+    # Usamos list() para poder eliminar farmacias si quedan vacías
+    for f_id in list(carrito_sesion['farmacias'].keys()):
+        f_data = carrito_sesion['farmacias'][f_id]
+        subtotal_farmacia = decimal.Decimal('0.0')
+        
+        # Usamos list() para poder eliminar items
+        for i_id in list(f_data['items'].keys()):
+            i_data = f_data['items'][i_id]
+            
+            # Calcular subtotal del item
+            subtotal_item = decimal.Decimal(i_data['precio_unitario']) * i_data['cantidad']
+            i_data['subtotal'] = str(subtotal_item) # <-- Total por medicamento
+            subtotal_farmacia += subtotal_item
+        
+        # Si la farmacia ya no tiene items, la eliminamos del carrito
+        if not f_data['items']:
+            carrito_sesion['farmacias'].pop(f_id)
+        else:
+            f_data['subtotal'] = str(subtotal_farmacia)
+            total_general += subtotal_farmacia
+
+    carrito_sesion['total_general'] = str(total_general)
+    return carrito_sesion
 
 @login_required
-def add_to_cart(request, stock_id):
-    stock_item = get_object_or_404(StockMedicamento, id=stock_id)
-    cantidad = int(request.POST.get('cantidad', 1))
-    carrito = request.session.get('carrito', {'farmacias': {}, 'total_general': 0.0})
+def _add_to_cart_logic(request, stock_id, cantidad):
+    """
+    Función auxiliar para agregar un item al carrito de la sesión.
+    Maneja el stock y los mensajes de error/éxito.
+    """
+    try:
+        stock_item = get_object_or_404(StockMedicamento, id=stock_id)
 
+        # 1. Validar stock
+        if stock_item.stock_actual < cantidad:
+            messages.error(request, f"No hay stock suficiente para {stock_item.medicamento.nombre_comercial}.")
+            return False # Indicar que falló
 
-    farmacia_id = str(stock_item.farmacia.id)
-    stock_id_str = str(stock_item.id)
+        # 2. Obtener carrito de la sesión (con strings para Decimal)
+        carrito_sesion = request.session.get('carrito', {'farmacias': {}, 'total_general': '0.0'})
 
-    farmacia_data = carrito['farmacias'].get(farmacia_id, {
-        'nombre_farmacia': stock_item.farmacia.nombre,
-        'subtotal': 0.0,
-        'items': {}
-    })
+        farmacia_id = str(stock_item.farmacia.id)
+        stock_id_str = str(stock_item.id)
 
-    item_data = farmacia_data['items'].get(stock_id_str, {
-        'nombre': stock_item.medicamento.nombre_comercial,
-        'precio_unitario': float(stock_item.precio),
-        'cantidad': 0
-    })
+        # 3. Obtener sub-carrito de la farmacia
+        farmacia_data = carrito_sesion['farmacias'].get(farmacia_id, {
+            'nombre_farmacia': stock_item.farmacia.nombre,
+            'subtotal': '0.0',
+            'items': {}
+        })
 
-    # Actualizar cantidad y subtotales
-    item_data['cantidad'] += cantidad
+        # 4. Obtener item (convirtiendo Decimal a string)
+        item_data = farmacia_data['items'].get(stock_id_str, {
+            'nombre': stock_item.medicamento.nombre_comercial,
+            'precio_unitario': str(stock_item.precio), # Usar str()
+            'stock_id': stock_item.id,
+            'cantidad': 0
+        })
 
-    #  Guardar todo de vuelta en la sesión
-    farmacia_data['items'][stock_id_str] = item_data
-    carrito['farmacias'][farmacia_id] = farmacia_data
-    
-    request.session['carrito'] = carrito # Guardar la sesión
-    request.session.modified = True # Marcarla como modificada
+         # 5. Actualizar cantidad
+        item_data['cantidad'] += cantidad
+        farmacia_data['items'][stock_id_str] = item_data
+        carrito_sesion['farmacias'][farmacia_id] = farmacia_data
 
-    messages.success(request, f"Agregado {stock_item.medicamento.nombre_comercial}.")
-    return redirect('ver_carrito')
+        # 6. REEMPLAZAR el cálculo de total anterior por esto:
+        carrito_sesion = _recalculate_cart_totals(carrito_sesion)
+
+        # 7. Guardar en la sesión
+        request.session['carrito'] = carrito_sesion
+        request.session.modified = True
+
+        messages.success(request, f"{stock_item.medicamento.nombre_comercial} agregado al carrito.")
+        return True
+
+    except Exception as e:
+        messages.error(request, f"Error al agregar al carrito: {e}")
+        return False
 ## me gustaria en realidad que dentro de la view de ver/ buscar remedias, al hacer click en el boton,
 # la otra view detecte ese post, tome los datos del  stock_id y se los pase a esta funcion,
 # y que esta no tenga return, simplemente ponga el mensajito de agregado
 
 
+@login_required
+def update_cart_item(request, stock_id_str):
+    """
+    Actualiza la cantidad de un ítem en el carrito.
+    """
+    if request.method == 'POST':
+        
+        # 💥 SOLUCIÓN: Buscar el nombre del input específico, ej: "cantidad-123"
+        cantidad_input_name = f"cantidad-{stock_id_str}"
+        
+        try:
+            # Leer la cantidad de ESE input específico
+            cantidad = int(request.POST.get(cantidad_input_name, 1))
+        except ValueError:
+            messages.error(request, "Cantidad inválida.")
+            return redirect('ver_carrito')
+
+        # ... (El resto de tu lógica de 'update_cart_item' es correcta) ...
+        # (Buscar carrito, validar stock, recalcular, guardar sesión)
+        carrito = request.session.get('carrito')
+        if not carrito:
+            return redirect('ver_carrito')
+
+        if cantidad <= 0:
+            return remove_cart_item(request, stock_id_str)
+
+        item_encontrado = False
+        for f_id, f_data in carrito['farmacias'].items():
+            if stock_id_str in f_data['items']:
+                
+                try:
+                    stock_obj = StockMedicamento.objects.get(id=int(stock_id_str))
+                    if stock_obj.stock_actual < cantidad:
+                        messages.error(request, f"Stock insuficiente (Máx: {stock_obj.stock_actual}).")
+                        return redirect('ver_carrito')
+                except StockMedicamento.DoesNotExist:
+                    messages.error(request, "El producto ya no existe.")
+                    return redirect('ver_carrito')
+
+                f_data['items'][stock_id_str]['cantidad'] = cantidad
+                item_encontrado = True
+                break
+        
+        if item_encontrado:
+            request.session['carrito'] = _recalculate_cart_totals(carrito)
+            request.session.modified = True
+            messages.success(request, "Cantidad actualizada.")
+        
+    return redirect('ver_carrito')
+
+@login_required
+def remove_cart_item(request, stock_id_str):
+    """
+    Elimina un ítem del carrito, sin importar la cantidad.
+    """
+    carrito = request.session.get('carrito')
+    if not carrito:
+        return redirect('ver_carrito')
+
+    item_nombre = "Producto"
+    item_eliminado = False
+    
+    # Buscar el ítem y eliminarlo
+    for f_id, f_data in carrito['farmacias'].items():
+        if stock_id_str in f_data['items']:
+            item_data = f_data['items'].pop(stock_id_str) # <-- Elimina el ítem
+            item_nombre = item_data.get('nombre', 'Producto')
+            item_eliminado = True
+            break # Ítem encontrado y eliminado
+
+    if item_eliminado:
+        # Recalcular (esto también eliminará la farmacia si queda vacía)
+        request.session['carrito'] = _recalculate_cart_totals(carrito)
+        request.session.modified = True
+        messages.success(request, f"{item_nombre} eliminado del carrito.")
+
+    return redirect('ver_carrito')
 
 @login_required
 def ver_carrito(request):
     carrito_session = request.session.get('carrito', {'farmacias': {}})
     
+    total_general_str = carrito_session.get('total_general', '0.0')
+
     carrito_contexto = {
         'farmacias': [],
-        'total_general': carrito_session.get('total_general', 0.0)
+        # 2. Convertir el total de vuelta a un número (Decimal)
+        'total_general': decimal.Decimal(total_general_str)
     }
     
     hay_items_con_receta = False
@@ -86,7 +216,18 @@ def ver_carrito(request):
                 # Obtenemos el objeto real del inventario
                 stock_item = StockMedicamento.objects.select_related('medicamento').get(id=item_id)
                 
+                precio_unitario = decimal.Decimal(item_data['precio_unitario'])
+                cantidad = int(item_data['cantidad'])
+
+               
+                subtotal_item = precio_unitario * cantidad
+                
+               
                 item_data['stock_obj'] = stock_item
+                item_data['precio_unitario'] = precio_unitario
+                item_data['subtotal'] = subtotal_item 
+                
+                # --- FIN DE LA SOLUCIÓN ---
                 items_contexto.append(item_data)
                 
                 if stock_item.medicamento.requiere_receta:
@@ -199,44 +340,54 @@ def finalizar_compra_view(request):
 @login_required
 def buscar_medicamentos(request):
     
+    # --- Lógica de "Agregar al Carrito" (POST) ---
+    if request.method == 'POST':
+        stock_id = request.POST.get('stock_id')
+        cantidad = int(request.POST.get('cantidad', 1))
+        
+        if stock_id:
+            # Llamamos a la lógica auxiliar
+            _add_to_cart_logic(request, stock_id, cantidad)
+            
+            # IMPORTANTE: Usamos el patrón "POST-Redirect-GET"
+            # Redirigimos de vuelta a la MISMA página de búsqueda (con los filtros GET).
+            # Esto evita que el formulario se reenvíe si el usuario recarga la página.
+            query_params = request.GET.urlencode()
+            return redirect(f"{request.path}?{query_params}")
+
+    # --- Lógica de Búsqueda (GET) ---
+    # Esta parte se ejecuta si el método es GET,
+    # o después del redirect del POST.
+    
     query = request.GET.get('q', '')
     obra_social_id = request.GET.get('obra_social_id', '')
-    medicamentos = []
-
-    # Obtengo todas las obras sociales 
+    
     obras_sociales = ObraSocial.objects.all()
+    
+    resultados = StockMedicamento.objects.select_related('medicamento', 'farmacia').all()
 
-    # 
-    if query or obra_social_id:
-        # Aquí iría tu lógica real de filtrado en la base de datos
-        # Ejemplo:
-        # medicamentos_qs = Medicamento.objects.all()
-        # if query:
-        #     medicamentos_qs = medicamentos_qs.filter(
-        #         Q(nombre_comercial__icontains=query) | Q(principio_activo__icontains=query)
-        #     )
-        # if obra_social_id:
-        #     # Filtro más complejo que incluye stock y obra social
-        #     medicamentos_qs = medicamentos_qs.filter(stock__farmacia__obras_sociales__id=obra_social_id).distinct()
-        
-        # medications = medicamentos_qs[:20] # Limitar resultados
-        
-        # Por ahora, simulamos un resultado para que el HTML funcione:
-        medicamentos = [
-            {'id': 1, 'nombre_comercial': 'Ibuprofeno 600mg', 'principio_activo': 'Ibuprofeno', 'precio': 500},
-            {'id': 2, 'nombre_comercial': 'Amoxicilina 500mg', 'principio_activo': 'Amoxicilina', 'precio': 950},
-        ]
-
+    if query:
+        resultados = resultados.filter(
+            Q(medicamento__nombre_comercial__icontains=query) |
+            Q(medicamento__principio_activo__icontains=query)
+        )
+    if obra_social_id:
+        resultados = resultados.filter(
+            farmacia__obras_sociales__id=obra_social_id
+        )
+    
+    resultados = resultados.filter(
+        farmacia__valido=True, 
+        stock_actual__gt=0
+    ).distinct()
 
     context = {
         'query': query,
         'obras_sociales': obras_sociales,
-        'medicamentos': medicamentos,
+        'selected_obra_social': int(obra_social_id) if obra_social_id else None,
+        'medicamentos_stock': resultados[:50],
     }
     return render(request, 'cliente/buscar_medicamentos.html', context)
-    
-    
-    
     
 # ---------- FARMACIA ----------
 @login_required
@@ -281,7 +432,7 @@ def farmacia_aceptar(request, pedido_id):
     )
     pedido.estado = "ACEPTADO"
     pedido.save()
-    
+    messages.success(request, f"Se acepto el pedido exitosamente.")
     return redirect("farmacia_panel")
 
 @login_required
@@ -297,7 +448,7 @@ def farmacia_rechazar(request, pedido_id):
     )
     pedido.estado = "RECHAZADO"
     pedido.save()
-    
+    messages.success(request, f"Se rechazo el pedido exitosamente.")
     return redirect("farmacia_panel")
 
 @login_required

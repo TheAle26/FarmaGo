@@ -1,0 +1,22 @@
+En qué se estuvo trabajando el equipo? 
+Alejo(SM): Verificar como administrador farmacias y repartidores. Y agregar filtros para busqueda mas comoda
+Amalia	 : Modificar el inventario de medicamentos de la farmacia. Problemas en los paths. 
+Ezequiel : Buscar medicamentos como cliente. Solucione los TYC
+Mateo	 : Ver los pedidos disponibles como repartidos. Soluciono problemas  carga de imagen. Penso como haer para ver pedidos de farmacia
+
+Que problemas se presentaron?
+Alejo(SM): Problemas con GitHub y la base de datos debido a las modificaciones de las tablas
+Amalia	 : Problemas de configuración con la API de google maps. Lo pudo solucionar.
+Ezequiel : No supe implementar una ventana emergente que muestre terminos y condiciones.
+Mateo	 : Problemas para implementar el pedido de los antecedentes penales como imagen. Logro sulucionarno agreagando modificando el settings.py
+
+En qué se va a trabajar posteriormente?
+
+Alejo(SM): Crear el Carrito, ver items de carrito y agregar items al carrito. Ver problemas del path
+Amalia	 : Aceptar y rechazar pedidos la farmacia. Ver con SM el problema del path
+Ezequiel : Aceptar pedido y ver pedido actual del repartidor
+Mateo	 : Ver pedidos entrantes de la farmacia
+
+
+
+

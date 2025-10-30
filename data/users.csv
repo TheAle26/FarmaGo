@@ -5,3 +5,13 @@ id,email,password,first_name,last_name
 4,cliente2@farmago.com,pass123,Maria,Lopez
 5,farmacia2@farmago.com,pass123,Luis,Martin
 6,repartidor2@farmago.com,pass123,Pedro,Bici
+7,cliente3@farmago.com,pass123,Carlos,Gomez
+8,farmacia3@farmago.com,pass123,Miguel,Sosa
+9,repartidor3@farmago.com,pass123,Jorge,Moto
+10,cliente4@farmago.com,pass123,Ana,Martinez
+11,farmacia4@farmago.com,pass123,Laura,Diaz
+12,repartidor4@farmago.com,pass123,Lucas,Auto
+13,cliente5@farmago.com,pass123,Lucia,Fernandez
+14,farmacia5@farmago.com,pass123,Roberto,Alba
+15,repartidor5@farmago.com,pass123,Matias,Camina
+16,cliente6@farmago.com,pass123,Pedro,Rodriguez

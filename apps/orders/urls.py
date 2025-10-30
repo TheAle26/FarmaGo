@@ -5,10 +5,11 @@ from .views import MedicamentoDetailView
 urlpatterns = [
     # Cliente
     path("cliente/", views.cliente_panel, name="cliente_panel"),
-    path("cliente/carrito/", views.ver_carrito, name="ver_carrito"),
+    
     path("cliente/carrito/finalizar_compra", views.finalizar_compra_view, name="finalizar_compra"),
     path('buscar/medicamentos/', views.buscar_medicamentos, name='buscar_medicamentos'),
     path('medicamento/<int:pk>/', MedicamentoDetailView.as_view(), name='medicamento_detalle'),
+    
     
     # Farmacia
     path("farmacia/", views.farmacia_panel, name="farmacia_panel"),
@@ -26,4 +27,10 @@ urlpatterns = [
     
     # Panel principal (redirige según tipo de perfil)
     path("panel/", views.panel_principal, name="panel_principal"),
+    
+    #carrito
+    path("cliente/carrito/", views.ver_carrito, name="ver_carrito"),
+    path('carrito/actualizar/<str:stock_id_str>/', views.update_cart_item, name='update_cart_item'),
+    path('carrito/eliminar/<str:stock_id_str>/', views.remove_cart_item, name='remove_cart_item'),
+
 ]
