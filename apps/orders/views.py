@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente
+from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Medicamento
+from apps.accounts.models import ObraSocial
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm
 from django.db import transaction, IntegrityError
 from django.db.models import F
 from django.contrib import messages
 from django.db.models import Case, When
+from django.shortcuts import render
+
 
 # ---------- CLIENTE ----------
 @login_required
@@ -186,6 +189,46 @@ def finalizar_compra_view(request):
         messages.error(request, str(e))
         return redirect('ver_carrito')
     
+@login_required
+def buscar_medicamentos(request):
+    
+    query = request.GET.get('q', '')
+    obra_social_id = request.GET.get('obra_social_id', '')
+    medicamentos = []
+
+    # Obtengo todas las obras sociales 
+    obras_sociales = ObraSocial.objects.all()
+
+    # 
+    if query or obra_social_id:
+        # Aquí iría tu lógica real de filtrado en la base de datos
+        # Ejemplo:
+        # medicamentos_qs = Medicamento.objects.all()
+        # if query:
+        #     medicamentos_qs = medicamentos_qs.filter(
+        #         Q(nombre_comercial__icontains=query) | Q(principio_activo__icontains=query)
+        #     )
+        # if obra_social_id:
+        #     # Filtro más complejo que incluye stock y obra social
+        #     medicamentos_qs = medicamentos_qs.filter(stock__farmacia__obras_sociales__id=obra_social_id).distinct()
+        
+        # medications = medicamentos_qs[:20] # Limitar resultados
+        
+        # Por ahora, simulamos un resultado para que el HTML funcione:
+        medicamentos = [
+            {'id': 1, 'nombre_comercial': 'Ibuprofeno 600mg', 'principio_activo': 'Ibuprofeno', 'precio': 500},
+            {'id': 2, 'nombre_comercial': 'Amoxicilina 500mg', 'principio_activo': 'Amoxicilina', 'precio': 950},
+        ]
+
+
+    context = {
+        'query': query,
+        'obras_sociales': obras_sociales,
+        'medicamentos': medicamentos,
+    }
+    return render(request, 'cliente/buscar_medicamentos.html', context)
+    
+    
     
     
 # ---------- FARMACIA ----------
@@ -361,9 +404,9 @@ def repartidor_ver_pedidos(request):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
 
     # se puede chequear aqui que no tenga un pedido en curso si se quiere.
-    """if Pedido.objects.filter(repartidor=request.user.repartidor, estado="EN_CAMINO").exists():
-        messages.warning(request, "Tienes un pedido en curso.")
-        return redirect("repartidor_panel")"""
+    #"""if Pedido.objects.filter(repartidor=request.user.repartidor, estado="EN_CAMINO").exists():
+    #    messages.warning(request, "Tienes un pedido en curso.")
+    #    return redirect("repartidor_panel")"""
 
     pedidos = Pedido.objects.filter(estado="ACEPTADO").order_by("creado")
     return render(request, "repartidor/pedidos.html", {"pedidos": pedidos})
@@ -395,5 +438,7 @@ def panel_principal(request):
         return redirect("repartidor_panel")
     else:
         return HttpResponseForbidden("Perfil no reconocido.")
+
+
 
 

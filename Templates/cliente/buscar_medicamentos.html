@@ -1,0 +1,52 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Buscar Medicamentos</h2>
+
+    <form method="get" action="{% url 'buscar_medicamentos' %}" class="mb-4">
+        <div class="row g-3 align-items-center">
+            
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control" placeholder="Nombre o principio activo..." value="{{ query }}">
+            </div>
+
+            <div class="col-md-4">
+                <select name="obra_social_id" class="form-select">
+                    <option value="">Filtrar por Obra Social (Todas)</option>
+                    {% for os in obras_sociales %}
+                        <option value="{{ os.id }}" 
+                            {% if request.GET.obra_social_id|lower == os.id|stringformat:"s" %}selected{% endif %}>
+                            {{ os.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
+    {% if medicamentos %}
+        <div class="list-group">
+            {% for med in medicamentos %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ med.nombre_comercial }}</strong> - ${{ med.precio }}
+                        <p class="text-muted small mb-0">Principio Activo: {{ med.principio_activo }}</p>
+                    </div>
+                    <a href="{% url 'medicamento_detalle' pk=med.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% elif query or request.GET.obra_social_id %}
+        <div class="alert alert-warning">No se encontraron medicamentos para su búsqueda o filtros.</div>
+    {% else %}
+        <div class="alert alert-info">Utilice la barra de búsqueda y los filtros para encontrar medicamentos.</div>
+    {% endif %}
+</div>
+{% endblock %}
