@@ -2,7 +2,7 @@ import decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Medicamento, Notificacion
+from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Medicamento
 from django.views.generic import DetailView
 from apps.accounts.models import ObraSocial
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
@@ -474,10 +474,6 @@ def farmacia_aceptar(request, pedido_id):
         pedido.save()
         pedido.descontar_stock()
 
-    pedido.notificar_cliente(
-        "Pedido aceptado",
-        f"Tu pedido #{pedido.id} fue aceptado por {pedido.farmacia.nombre}."
-    )
 
     messages.success(request, "Se aceptó el pedido exitosamente.")
     return redirect("farmacia_pedidos")
@@ -493,16 +489,27 @@ def farmacia_rechazar(request, pedido_id):
         estado="PENDIENTE", 
         farmacia=request.user.farmacia 
     )
+    if request.method != "POST":
+        messages.error(request, "Debes seleccionar un motivo para rechazar el pedido.")
+        return redirect("farmacia_pedidos")
+
+    motivo = request.POST.get("motivo")
+    comentario = (request.POST.get("comentario") or "").strip()
+
+    if not motivo:
+        messages.error(request, "Seleccioná un motivo de rechazo.")
+        return redirect("farmacia_pedidos")
+
+    if motivo == "OTRO" and not comentario:
+        messages.error(request, "Indicá un detalle cuando el motivo es 'Otro'.")
+        return redirect("farmacia_pedidos")
+
     pedido.estado = "RECHAZADO"
+    pedido.motivo_rechazo = motivo
+    pedido.comentario_rechazo = comentario or None
     pedido.save()
-    # Notificación al cliente
-    Notificacion.objects.create(
-        usuario=pedido.cliente.user,
-        titulo="Pedido rechazado",
-        mensaje=f"Tu pedido #{pedido.id} fue rechazado por la farmacia."
-    )
     messages.success(request, f"Se rechazo el pedido exitosamente.")
-    return redirect("farmacia_panel")
+    return redirect("farmacia_pedidos")
 
 @login_required
 def farmacia_gestionar_inventario(request):

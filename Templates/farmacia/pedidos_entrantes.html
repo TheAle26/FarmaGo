@@ -19,7 +19,19 @@
                             <strong>Pedido #{{ p.id }}</strong>
                             <div class="text-muted">Cliente: {% if p.cliente %}{{ p.cliente.user.email }}{% else %}--{% endif %}</div>
                             <div class="text-muted">Creado: {{ p.creado|date:"d/m/Y H:i" }}</div>
-                            <div class="mt-2">Estado: <span class="badge bg-secondary">{{ p.get_estado_display }}</span></div>
+                            <div class="mt-2">Estado: 
+                                <span class="badge bg-secondary">{{ p.get_estado_display }}</span> 
+                                {% if p.estado == 'RECHAZADO' %}
+                                    {% if p.motivo_rechazo %}
+                                        <text class="small mt-1 text-muted">
+                                            <strong>&nbsp Motivo:</strong> {{ p.motivo_rechazo_legible }}
+                                            {% if p.comentario_rechazo %}
+                                                ({{ p.comentario_rechazo }})
+                                            {% endif %}
+                                        </text>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="text-end">
                             <div>Total: <strong>${{ p.total }}</strong></div>
@@ -29,10 +41,43 @@
                                     <button type="submit" class="btn btn-success btn-sm btn-aceptar"
                                     disabled>Aceptar</button>
                                 </form>
-                                <form action="{% url 'farmacia_rechazar' p.id %}" method="post" class="d-inline">
+                                <button class="btn btn-danger btn-sm mt-2"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#rechazoForm_{{ p.id }}"
+                                        aria-expanded="false"
+                                        aria-controls="rechazoForm_{{ p.id }}">
+                                    Rechazar
+                                </button>
+
+                                <div class="collapse mt-2" id="rechazoForm_{{ p.id }}">
+                                    <form action="{% url 'farmacia_rechazar' p.id %}" method="post" class="rechazo-form" data-pedido-id="{{ p.id }}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
-                                </form>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-sm-5">
+                                        <label class="form-label mb-1">Motivo</label>
+                                        <select name="motivo" class="form-select form-select-sm motivo-select" required>
+                                            <option value="" selected disabled>Seleccioná un motivo…</option>
+                                            <option value="SIN_STOCK">Sin stock</option>
+                                            <option value="RECETA_INVALIDA">Receta inválida</option>
+                                            <option value="FUERA_DE_COBERTURA">Fuera de cobertura/entrega</option>
+                                            <option value="DATOS_INCOMPLETOS">Datos incompletos/ilegibles</option>
+                                            <option value="OTRO">Otro</option>
+                                        </select>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        <label class="form-label mb-1">Detalle (requerido si elegís “Otro”)</label>
+                                        <textarea name="comentario"
+                                                    rows="2"
+                                                    class="form-control form-control-sm comentario-input"
+                                                    placeholder="Especificá el motivo…"></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                        <button class="btn btn-outline-danger btn-sm mt-2" type="submit">Confirmar rechazo</button>
+                                        </div>
+                                    </div>
+                                    </form>
+                                </div>
                                 
 
 
@@ -91,6 +136,8 @@
 
 </div>
 
+
+<!-- JavaScript para manejar la lógica de habilitar/deshabilitar el botón "Aceptar" -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // 1. Busca todas las "cards" de pedido
@@ -133,5 +180,36 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<!-- JavaScript para manejar la lógica de requerir comentario si el motivo es OTRO -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Para cada form de rechazo, hacer requerido el comentario si el motivo es OTRO
+  document.querySelectorAll(".rechazo-form").forEach(function(form) {
+    const select = form.querySelector(".motivo-select");
+    const comentario = form.querySelector(".comentario-input");
+
+    function syncComentarioRequired() {
+      const esOtro = (select.value === "OTRO");
+      comentario.required = esOtro;
+      // UX: marcar/desmarcar visual
+      comentario.classList.toggle("is-invalid", esOtro && !comentario.value.trim());
+    }
+
+    // Inicial y listeners
+    syncComentarioRequired();
+    select.addEventListener("change", syncComentarioRequired);
+    comentario.addEventListener("input", syncComentarioRequired);
+
+    // Validación extra antes de enviar
+    form.addEventListener("submit", function(e) {
+      if (select.value === "OTRO" && !comentario.value.trim()) {
+        e.preventDefault();
+        comentario.focus();
+        comentario.classList.add("is-invalid");
+      }
+    });
+  });
+});
+</script>
 
 {% endblock %}
