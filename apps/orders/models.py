@@ -78,8 +78,25 @@ class StockMedicamento(models.Model):
     def __str__(self):
         return f"{self.medicamento.nombre_comercial} en {self.farmacia.nombre}"
     
+
     
+# notificación al cliente
+class Notificacion(models.Model):
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="notificaciones"
+    )
+    titulo = models.CharField(max_length=150)
+    mensaje = models.TextField()
+    creado = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario}"  
     
+
+
 class Pedido(models.Model):
     ESTADOS = [
         ('PENDIENTE','Pendiente'),
@@ -119,6 +136,46 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido #{self.id} - Estado: {self.get_estado_display()}"
+    
+    # auxiliares para aceptar pedido desde farmacia
+    def requiere_validacion_receta(self):
+        """True si alguno de los medicamentos requiere receta."""
+        return any(item.medicamento.requiere_receta for item in self.items.all())
+
+    def validar_stock(self):
+        """
+        Revisa si la farmacia tiene stock suficiente para todos los ítems.
+        Retorna (True, []) si todo ok o (False, lista_faltantes)
+        """
+        faltantes = []
+        for item in self.items.select_related("medicamento"):
+            inv = StockMedicamento.objects.filter(
+                farmacia=self.farmacia,
+                medicamento=item.medicamento
+            ).first()
+            if not inv or inv.stock_actual < item.cantidad:
+                faltantes.append(
+                    f"{item.medicamento.nombre_comercial} (necesita {item.cantidad}, hay {inv.stock_actual if inv else 0})"
+                )
+        return (len(faltantes) == 0, faltantes)
+
+    def descontar_stock(self):
+        """Descuenta del inventario el stock utilizado."""
+        for item in self.items.select_related("medicamento"):
+            inv = StockMedicamento.objects.select_for_update().get(
+                farmacia=self.farmacia, 
+                medicamento=item.medicamento
+            )
+            inv.stock_actual -= item.cantidad
+            inv.save()
+
+    def notificar_cliente(self, titulo, mensaje):
+        """Crea una notificación al cliente."""
+        Notificacion.objects.create(
+            usuario=self.cliente.user,
+            titulo=titulo,
+            mensaje=mensaje
+        )
 
 
 class DetallePedido(models.Model):

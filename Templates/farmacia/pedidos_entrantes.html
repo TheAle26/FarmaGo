@@ -24,14 +24,19 @@
                         <div class="text-end">
                             <div>Total: <strong>${{ p.total }}</strong></div>
                             {% if p.estado == 'PENDIENTE' %}
-                                <form action="{% url 'farmacia_aceptar' p.id %}" method="post" class="d-inline">
+                                <form action="{% url 'farmacia_aceptar' p.id %}" method="post" class="d-inline form-aceptar" id="form-aceptar-{{ p.id }}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
+                                    <button type="submit" class="btn btn-success btn-sm btn-aceptar"
+                                    disabled>Aceptar</button>
                                 </form>
                                 <form action="{% url 'farmacia_rechazar' p.id %}" method="post" class="d-inline">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
                                 </form>
+                                
+
+
+
                             {% endif %}
                         </div>
                     </div>
@@ -41,17 +46,38 @@
                         <h6 class="mb-2">Artículos</h6>
                         <ul class="list-group">
                             {% for item in p.items.all %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ item.medicamento.nombre_comercial }}</strong>
-                                        <div class="small text-muted">Cantidad: {{ item.cantidad }} · Precio unitario: ${{ item.precio_unitario_snapshot }}</div>
-                                        {% if item.receta_adjunta %}
-                                            <div class="small"><a href="{{ item.receta_adjunta.url }}" target="_blank">Ver receta adjunta</a></div>
+                                <li class="list-group-item d-flex justify-content-between align-items-start flex-column">
+                                    <div class="w-100 d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ item.medicamento.nombre_comercial }}</strong>
+                                            <div class="small text-muted">Cantidad: {{ item.cantidad }} · Precio unitario: ${{ item.precio_unitario_snapshot }}</div>
+                                            {% if item.receta_adjunta %}
+                                                <div class="small"><a href="{{ item.receta_adjunta.url }}" target="_blank">Ver receta adjunta</a></div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span>${{ item.subtotal }}</span>
+                                        </div>
+                                    </div>
+                                    {% if p.estado == 'PENDIENTE' %}
+                                        {% if item.medicamento.requiere_receta %}
+                                            <div class="form-check mb-1">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="chk_{{ item.id }}"
+                                                    name="confirmar_receta_{{ item.id }}"
+                                                    form="form-aceptar-{{ p.id }}"
+                                                >
+                                                <label class="form-check-label small" for="chk_{{ item.id }}">
+                                                    Confirmo la receta de <strong>{{ item.medicamento.nombre_comercial }}</strong>
+                                                    {% if not item.receta_adjunta %}
+                                                        — <span class="text-danger">No hay receta adjunta</span>
+                                                    {% endif %}
+                                                </label>
+                                            </div>
                                         {% endif %}
-                                    </div>
-                                    <div>
-                                        <span>${{ item.subtotal }}</span>
-                                    </div>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
@@ -64,4 +90,48 @@
     {% endif %}
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Busca todas las "cards" de pedido
+    document.querySelectorAll(".card.mb-3").forEach(function(card) {
+        
+        // 2. Encuentra el formulario de "Aceptar" y el botón DENTRO de esa card
+        const formAceptar = card.querySelector(".form-aceptar");
+        if (!formAceptar) return; // Si no hay formulario, no hace nada
+
+        const aceptarBtn = formAceptar.querySelector(".btn-aceptar");
+        if (!aceptarBtn) return; // Si no hay botón, no hace nada
+
+        // 3. Encuentra TODOS los checkboxes DENTRO de ESE formulario
+        const checks = Array.from(card.querySelectorAll(".form-check-input"));
+
+        // 4. Función que verifica si TODOS los checks están marcados
+        function actualizarEstadoBoton() {
+            // ¿Hay algún medicamento que requiera receta? (si hay checkboxes, sí)
+            const hayRequeridas = checks.length > 0;
+
+            // ¿Falta alguna receta adjunta? (buscamos el span de alerta en la card)
+            const faltaAdjunta = card.querySelector(".form-check-label .text-danger") !== null;
+
+            // ¿Todas las casillas marcadas?
+            const todasMarcadas = checks.every(chk => chk.checked);
+
+            // Regla:
+            // - Si hay requeridas: habilitar solo si todas están marcadas y no falta adjunta
+            // - Si NO hay requeridas: habilitar (no hay nada que validar)
+            aceptarBtn.disabled = hayRequeridas ? !(todasMarcadas && !faltaAdjunta) : false;
+        }
+
+        // Eventos
+        checks.forEach(chk => chk.addEventListener("change", actualizarEstadoBoton));
+        // Si cambiara el DOM dinámicamente (no es tu caso), se podría observar, pero con esto alcanza.
+
+        // Estado inicial
+        actualizarEstadoBoton();
+    });
+});
+</script>
+
+
 {% endblock %}
