@@ -55,3 +55,35 @@ class EditStockMedicamentoForm(forms.ModelForm):
     class Meta:
         model = StockMedicamento
         fields = ['precio', 'stock_actual']
+
+class FarmaciaAceptarPedidoForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.pedido = kwargs.pop("pedido")
+        super().__init__(*args, **kwargs)
+
+        # Crear un campo booleano para cada item que requiera receta
+        for item in self.pedido.items.select_related("medicamento"):
+            if item.medicamento.requiere_receta:
+                field_name = f"confirmar_receta_{item.id}"
+                self.fields[field_name] = forms.BooleanField(
+                    required=False,
+                    label=f"Confirmo la receta de {item.medicamento.nombre_comercial}",
+                )
+
+    def clean(self):
+        cleaned = super().clean()
+        errores = []
+
+        # Verificar que TODAS las recetas requeridas estén marcadas
+        for item in self.pedido.items.select_related("medicamento"):
+            if item.medicamento.requiere_receta:
+                field_name = f"confirmar_receta_{item.id}"
+                if not cleaned.get(field_name):
+                    errores.append(
+                        f"Debes confirmar la receta de {item.medicamento.nombre_comercial}."
+                    )
+
+        if errores:
+            raise forms.ValidationError(errores)
+
+        return cleaned

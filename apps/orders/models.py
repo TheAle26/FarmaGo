@@ -77,9 +77,9 @@ class StockMedicamento(models.Model):
 
     def __str__(self):
         return f"{self.medicamento.nombre_comercial} en {self.farmacia.nombre}"
-    
-    
-    
+     
+
+
 class Pedido(models.Model):
     ESTADOS = [
         ('PENDIENTE','Pendiente'),
@@ -89,6 +89,14 @@ class Pedido(models.Model):
         ('RECHAZADO','Rechazado'),
     ]
     
+    MOTIVOS_RECHAZO = [
+        ('SIN_STOCK', 'Sin stock'),
+        ('RECETA_INVALIDA', 'Receta inválida'),
+        ('FUERA_DE_COBERTURA', 'Fuera de cobertura'),
+        ('PROBLEMAS_OPERATIVOS', 'Problemas operativos'),
+        ('OTRO', 'Otro'),
+    ]
+
     # El cliente SÍ es el User base
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="pedidos_cliente")
     
@@ -113,12 +121,53 @@ class Pedido(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='CARRITO')
     detalles = models.TextField(blank=True, help_text="Notas adicionales del cliente")
     creado = models.DateTimeField(auto_now_add=True)
+
+    motivo_rechazo = models.CharField(max_length=30, choices=MOTIVOS_RECHAZO, null=True, blank=True)
+    comentario_rechazo = models.TextField(null=True, blank=True)
     
     # Es útil tener un total en el pedido principal
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     direccion = models.CharField(max_length=255)
     def __str__(self):
         return f"Pedido #{self.id} - Estado: {self.get_estado_display()}"
+    
+    # auxiliares para aceptar pedido desde farmacia
+    def requiere_validacion_receta(self):
+        """True si alguno de los medicamentos requiere receta."""
+        return any(item.medicamento.requiere_receta for item in self.items.all())
+
+    def validar_stock(self):
+        """
+        Revisa si la farmacia tiene stock suficiente para todos los ítems.
+        Retorna (True, []) si todo ok o (False, lista_faltantes)
+        """
+        faltantes = []
+        for item in self.items.select_related("medicamento"):
+            inv = StockMedicamento.objects.filter(
+                farmacia=self.farmacia,
+                medicamento=item.medicamento
+            ).first()
+            if not inv or inv.stock_actual < item.cantidad:
+                faltantes.append(
+                    f"{item.medicamento.nombre_comercial} (necesita {item.cantidad}, hay {inv.stock_actual if inv else 0})"
+                )
+        return (len(faltantes) == 0, faltantes)
+
+    def descontar_stock(self):
+        """Descuenta del inventario el stock utilizado."""
+        for item in self.items.select_related("medicamento"):
+            inv = StockMedicamento.objects.select_for_update().get(
+                farmacia=self.farmacia, 
+                medicamento=item.medicamento
+            )
+            inv.stock_actual -= item.cantidad
+            inv.save()
+
+    def motivo_rechazo_legible(self):
+        if not self.motivo_rechazo:
+            return None
+        dict_motivos = dict(self.MOTIVOS_RECHAZO)
+        return dict_motivos.get(self.motivo_rechazo, self.motivo_rechazo)
 
 
 class DetallePedido(models.Model):

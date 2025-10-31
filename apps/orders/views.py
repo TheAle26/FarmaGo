@@ -6,7 +6,7 @@ from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Me
 from django.views.generic import DetailView
 from apps.accounts.models import ObraSocial
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
-from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm
+from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm, FarmaciaAceptarPedidoForm
 from django.db import transaction, IntegrityError
 from django.db.models import F,Q
 from django.contrib import messages
@@ -449,10 +449,53 @@ def farmacia_aceptar(request, pedido_id):
         estado="PENDIENTE", 
         farmacia=request.user.farmacia 
     )
-    pedido.estado = "ACEPTADO"
-    pedido.save()
-    messages.success(request, f"Se acepto el pedido exitosamente.")
-    return redirect("farmacia_panel")
+    if request.method != "POST":
+        return redirect("farmacia_pedidos")
+
+    # 1) Validar casillas por cada ítem que requiere receta
+    faltan_confirmar = []
+    faltan_adjuntos = []
+    for item in pedido.items.select_related("medicamento"):
+        if item.medicamento.requiere_receta:
+            # a) Debe existir la receta adjunta (archivo)
+            if not item.receta_adjunta:
+                faltan_adjuntos.append(item.medicamento.nombre_comercial)
+            # b) Debe marcarse la casilla del ítem
+            if not request.POST.get(f"confirmar_receta_{item.id}"):
+                faltan_confirmar.append(item.medicamento.nombre_comercial)
+
+    if faltan_adjuntos:
+        messages.error(
+            request,
+            "No se puede aceptar: faltan recetas adjuntas para: " + ", ".join(faltan_adjuntos)
+        )
+        return redirect("farmacia_pedidos")
+
+    if faltan_confirmar:
+        messages.error(
+            request,
+            "Debés confirmar las recetas de: " + ", ".join(faltan_confirmar)
+        )
+        return redirect("farmacia_pedidos")
+
+    # 2) Validar stock (usa los helpers del modelo)
+    ok, faltantes = pedido.validar_stock()
+    if not ok:
+        messages.error(
+            request,
+            "No se puede aceptar: stock insuficiente de: " + "; ".join(faltantes)
+        )
+        return redirect("farmacia_pedidos")
+
+    # 3) Aceptar + descontar stock + notificar
+    with transaction.atomic():
+        pedido.estado = "ACEPTADO"
+        pedido.save()
+        pedido.descontar_stock()
+
+
+    messages.success(request, "Se aceptó el pedido exitosamente.")
+    return redirect("farmacia_pedidos")
 
 @login_required
 def farmacia_rechazar(request, pedido_id):
@@ -465,10 +508,27 @@ def farmacia_rechazar(request, pedido_id):
         estado="PENDIENTE", 
         farmacia=request.user.farmacia 
     )
+    if request.method != "POST":
+        messages.error(request, "Debes seleccionar un motivo para rechazar el pedido.")
+        return redirect("farmacia_pedidos")
+
+    motivo = request.POST.get("motivo")
+    comentario = (request.POST.get("comentario") or "").strip()
+
+    if not motivo:
+        messages.error(request, "Seleccioná un motivo de rechazo.")
+        return redirect("farmacia_pedidos")
+
+    if motivo == "OTRO" and not comentario:
+        messages.error(request, "Indicá un detalle cuando el motivo es 'Otro'.")
+        return redirect("farmacia_pedidos")
+
     pedido.estado = "RECHAZADO"
+    pedido.motivo_rechazo = motivo
+    pedido.comentario_rechazo = comentario or None
     pedido.save()
     messages.success(request, f"Se rechazo el pedido exitosamente.")
-    return redirect("farmacia_panel")
+    return redirect("farmacia_pedidos")
 
 @login_required
 def farmacia_gestionar_inventario(request):
