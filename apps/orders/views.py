@@ -14,6 +14,18 @@ from django.db.models import Case, When
 from django.shortcuts import render
 from django.http import JsonResponse
 
+@login_required
+def panel_principal(request):
+    if es_cliente(request.user):
+        return redirect("cliente_panel")
+    elif es_farmacia(request.user):
+        return redirect("farmacia_panel")
+    elif es_repartidor(request.user):
+        return redirect("repartidor_panel")
+    else:
+        return HttpResponseForbidden("Perfil no reconocido.")
+
+
 
 class MedicamentoDetailView(DetailView):
     model = Medicamento
@@ -591,18 +603,6 @@ def crear_pedido(request):
 
 
 #---------- Panel redirect ----------
-
-
-@login_required
-def panel_principal(request):
-    if es_cliente(request.user):
-        return redirect("cliente_panel")
-    elif es_farmacia(request.user):
-        return redirect("farmacia_panel")
-    elif es_repartidor(request.user):
-        return redirect("repartidor_panel")
-    else:
-        return HttpResponseForbidden("Perfil no reconocido.")
 
 
 

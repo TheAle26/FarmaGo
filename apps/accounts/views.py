@@ -6,9 +6,9 @@ from django.contrib.auth import login, logout
 from .forms import (RegistroClienteForm, RegistroFarmaciaForm, RegistroRepartidorForm)
 from .models import Cliente, Farmacia, Repartidor
 from django.urls import reverse
-
-
-
+from django.contrib.auth.decorators import login_required
+from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
+from django.http import HttpResponseForbidden
 class CustomLoginView(LoginView):
     success_url = None
     template_name = "login.html" 
@@ -113,4 +113,15 @@ def registro_repartidor(request):
     return render(request, "registro_form.html", {"form": form, "titulo": "Registro Repartidor"})
 
 
+
+@login_required
+def panel_principal(request):
+    if es_cliente(request.user):
+        return redirect("cliente_panel")
+    elif es_farmacia(request.user):
+        return redirect("farmacia_panel")
+    elif es_repartidor(request.user):
+        return redirect("repartidor_panel")
+    else:
+        return HttpResponseForbidden("Perfil no reconocido.")
 

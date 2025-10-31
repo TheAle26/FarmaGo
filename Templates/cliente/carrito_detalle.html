@@ -9,6 +9,7 @@
 
         {% for farmacia_data in carrito_data.farmacias %}
             <div class="card mb-3">
+                {{ farmacia_data.nombre}}
                 <ul class="list-group list-group-flush">
                     {% for item in farmacia_data.items_enriquecidos %}
                         <li class="list-group-item">
