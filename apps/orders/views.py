@@ -8,7 +8,7 @@ from apps.accounts.models import ObraSocial, Repartidor
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm, FarmaciaAceptarPedidoForm
 from django.db import transaction, IntegrityError
-from django.db.models import F, Q, IntegerField
+from django.db.models import F, Q, IntegerField, ExpressionWrapper, DecimalField
 from django.contrib import messages
 from django.db.models import Case, When
 from django.shortcuts import render
@@ -436,7 +436,17 @@ def cliente_ver_pedido(request, pedido_id):
         cliente=request.user.cliente
     )
 
-    detalles = DetallePedido.objects.filter(pedido=pedido).select_related('medicamento')
+    # Anotar subtotal por detalle para mostrar en la plantilla y evitar cálculos en el template
+    detalles = (
+        DetallePedido.objects.filter(pedido=pedido)
+        .select_related('medicamento')
+        .annotate(
+            subtotal_calc=ExpressionWrapper(
+                F('cantidad') * F('precio_unitario_snapshot'),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            )
+        )
+    )
 
     context = {
         'pedido': pedido,
