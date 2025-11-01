@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from .models import Pedido, DetallePedido, StockMedicamento,Farmacia,Cliente, Medicamento
 from django.views.generic import DetailView
-from apps.accounts.models import ObraSocial
+from apps.accounts.models import ObraSocial, Repartidor
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm, FarmaciaAceptarPedidoForm
 from django.db import transaction, IntegrityError
@@ -641,12 +641,49 @@ def repartidor_ver_pedidos(request):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
 
     # se puede chequear aqui que no tenga un pedido en curso si se quiere.
-    #"""if Pedido.objects.filter(repartidor=request.user.repartidor, estado="EN_CAMINO").exists():
-    #    messages.warning(request, "Tienes un pedido en curso.")
-    #    return redirect("repartidor_panel")"""
+    if Pedido.objects.filter(repartidor=request.user.repartidor, estado="EN_CAMINO").exists():
+        messages.warning(request, "Tienes un pedido en curso.")
+        return redirect("repartidor_panel")
 
     pedidos = Pedido.objects.filter(estado="ACEPTADO").order_by("creado")
     return render(request, "repartidor/pedidos.html", {"pedidos": pedidos})
+
+def repartidor_aceptar(request, pedido_id):
+    if request.method!="POST":
+        return redirect("repartidor_panel")
+    if not es_repartidor(request.user):
+        return HttpResponseForbidden("Solo repartidores")
+
+    try:
+        repartidor_instance = Repartidor.objects.get(user=request.user)
+    except Repartidor.DoesNotExist:
+    # Esto ocurre si el usuario pasa el es_repartidor pero el perfil no está creado
+        messages.error(request, "Tu perfil de repartidor no está completo o no existe.")
+        return redirect('repartidor_panel')
+
+    if not repartidor_instance.disponible:
+        messages.error(request, "Ya tienes un pedido asignado o en curso y no puedes aceptar uno nuevo.")
+        return redirect("repartidor_panel")
+    
+    try:
+        pedido = Pedido.objects.get(
+            pk=pedido_id, 
+            estado="ACEPTADO", 
+            repartidor__isnull=True
+        )
+    except Pedido.DoesNotExist:
+        # Captura si el pedido ya fue tomado o no cumple las condiciones
+        messages.error(request, "Este pedido ya no está disponible.")
+        return redirect("repartidor_panel")
+
+    repartidor_instance.disponible = False
+    repartidor_instance.save()
+
+    pedido.repartidor = repartidor_instance
+    pedido.estado = 'EN_CAMINO'        
+    pedido.save()
+    messages.success(request, f"Has aceptado el pedido #{pedido.id}.")
+    return redirect("repartidor_panel")
 
 #---------------------pedido----------------
 

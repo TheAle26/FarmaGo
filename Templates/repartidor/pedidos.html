@@ -22,8 +22,14 @@
           </div>
 
           <div class="text-end">
-            {# Botón Aceptar: todavía no funcional, por eso está deshabilitado #}
-            <button class="btn btn-primary" disabled>Aceptar</button>
+            {% if p.estado == 'ACEPTADO' %}
+              <form method="post" action="{% url 'repartidor_aceptar' p.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary mb-2">Aceptar Pedido</button>
+              </form>
+            {% else %}
+              <span class="badge text-bg-secondary">{{ p.estado }}</span>
+            {% endif %}
           </div>
         </div>
       </div>

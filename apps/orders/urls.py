@@ -24,6 +24,7 @@ urlpatterns = [
     path("repartidor/pedidos/", views.repartidor_ver_pedidos, name="repartidor_pedidos"),
     path("repartidor/tomar/<int:pedido_id>/", views.repartidor_tomar, name="repartidor_tomar"),
     path("repartidor/entregado/<int:pedido_id>/", views.repartidor_entregado, name="repartidor_entregado"),
+    path("repartidor/aceptar/<int:pedido_id>/", views.repartidor_aceptar, name="repartidor_aceptar"),
     
     # Panel principal (redirige según tipo de perfil)
     path("panel/", views.panel_principal, name="panel_principal"),
