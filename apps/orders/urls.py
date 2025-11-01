@@ -5,6 +5,7 @@ from .views import MedicamentoDetailView
 urlpatterns = [
     # Cliente
     path("cliente/", views.cliente_panel, name="cliente_panel"),
+    path("cliente/pedido/<int:pedido_id>/", views.cliente_ver_pedido, name="cliente_ver_pedido"),
     
     path("cliente/carrito/finalizar_compra", views.finalizar_compra_view, name="finalizar_compra"),
     path('buscar/medicamentos/', views.buscar_medicamentos, name='buscar_medicamentos'),

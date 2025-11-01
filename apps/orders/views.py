@@ -8,7 +8,7 @@ from apps.accounts.models import ObraSocial, Repartidor
 from apps.orders.utils import es_cliente, es_farmacia, es_repartidor
 from .forms import PedidoForm, EditStockMedicamentoForm, AddStockMedicamentoForm, FarmaciaAceptarPedidoForm
 from django.db import transaction, IntegrityError
-from django.db.models import F,Q
+from django.db.models import F, Q, IntegerField
 from django.contrib import messages
 from django.db.models import Case, When
 from django.shortcuts import render
@@ -26,17 +26,34 @@ def panel_principal(request):
         return HttpResponseForbidden("Perfil no reconocido.")
 
 
-
+    ## nose como usar esto, lo hice mas abajo como Cliente_ver_pedido
 class MedicamentoDetailView(DetailView):
     model = Medicamento
     template_name = 'cliente/medicamento_detalle.html' 
     context_object_name = 'medicamento'
 
 # ---------- CLIENTE ----------
+
 @login_required
 def cliente_panel(request):
     if not es_cliente(request.user): return HttpResponseForbidden("Solo clientes")
-    pedidos = Pedido.objects.filter(cliente=request.user.cliente).order_by("-creado")
+    # Ordenar por estado según la prioridad deseada y luego por fecha de creación
+    pedidos = (
+        Pedido.objects.filter(cliente=request.user.cliente)
+        .annotate(
+            prioridad_estado=Case(
+                When(estado="PENDIENTE", then=0),
+                When(estado="ACEPTADO", then=1),
+                When(estado="EN_CAMINO", then=2),
+                When(estado="ENTREGADO", then=3),
+                When(estado="RECHAZADO", then=4),
+                default=5,
+                output_field=IntegerField(),
+            )
+        )
+        .order_by('prioridad_estado', 'creado')
+    )
+
     return render(request, "cliente/panel.html", {"pedidos": pedidos})
 
 # orders/views.py
@@ -408,6 +425,26 @@ def buscar_medicamentos(request):
     }
     return render(request, 'cliente/buscar_medicamentos.html', context)
     
+    
+def cliente_ver_pedido(request, pedido_id):
+    if not es_cliente(request.user):
+        return HttpResponseForbidden("Solo clientes")
+
+    pedido = get_object_or_404(
+        Pedido,
+        id=pedido_id,
+        cliente=request.user.cliente
+    )
+
+    detalles = DetallePedido.objects.filter(pedido=pedido).select_related('medicamento')
+
+    context = {
+        'pedido': pedido,
+        'detalles': detalles
+    }
+    return render(request, 'cliente/ver_pedido.html', context)
+
+
 # ---------- FARMACIA ----------
 @login_required
 def farmacia_panel(request):
