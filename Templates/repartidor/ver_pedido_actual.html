@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <a href="{% url 'repartidor_panel' %}" class="btn btn-secondary mb-3">Volver al Panel</a>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Mi Entrega Activa: Pedido #{{ pedido.id }}</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <h5 class="card-title text-success">📍 Dirección de Retiro (Farmacia)</h5>
+                    <p>
+                        <strong>Farmacia:</strong> {{ pedido.farmacia.nombre }}<br>
+                        <strong>Dirección:</strong> {{ pedido.farmacia.direccion }}<br>
+                    </p>
+                    
+                    <hr>
+
+                    <h5 class="card-title text-danger">🏠 Dirección de Entrega (Cliente)</h5>
+                    <p>
+                        <strong>Cliente:</strong> {{ pedido.cliente.user.email }}<br>
+                        <strong>Dirección:</strong> {{ pedido.direccion_entrega }}
+                    </p>
+                    
+                    <hr>
+
+                    <h5 class="card-title">Detalles de la Entrega</h5>
+                    <p>
+                        <strong>Código de Seguridad (Entrega):</strong> 
+                        <span class="text-danger fw-bold fs-5">XXXX</span> 
+                        </p>
+                    <p>
+                        <strong>Ganancia Estimada:</strong> 
+                        <span class="fw-bold text-success">$XXX.XX</span> 
+                        </p>
+                    <p class="text-muted small">Tiempo estimado: XX minutos</p>
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'repartidor_entregado' pedido.id %}" class="btn btn-lg btn-success">
+                            Marcar como ENTREGADO
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+    </div>
+</div>
+{% endblock content %}

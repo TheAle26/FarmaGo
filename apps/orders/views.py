@@ -75,8 +75,8 @@ def _recalculate_cart_totals(carrito_sesion):
 def _add_to_cart_logic(request, stock_id, cantidad):
     """
     Función auxiliar para agregar un item al carrito de la sesión.
-    Maneja el stock y los mensajes de error/éxito.
-    """
+    Maneja el stock y los mensajes de error/éxito."""
+    
     try:
         stock_item = get_object_or_404(StockMedicamento, id=stock_id)
 
@@ -616,7 +616,15 @@ def repartidor_panel(request):
     disponibles = Pedido.objects.filter(estado="ACEPTADO", repartidor__isnull=True)
     # Usar la instancia `Repartidor` asociada al user
     mis = Pedido.objects.filter(repartidor=request.user.repartidor).exclude(estado__in=["ENTREGADO","RECHAZADO"])
-    return render(request, "repartidor/panel.html", {"disponibles": disponibles, "mis": mis})
+
+    repartidor_instance = Repartidor.objects.get(user=request.user)
+
+    pedido_activo = Pedido.objects.filter(
+        repartidor = repartidor_instance,
+        estado = 'EN_CAMINO'
+    ).first()
+
+    return render(request, "repartidor/panel.html", {"disponibles": disponibles, "mis": mis, "pedido_activo": pedido_activo})
 
 @login_required
 def repartidor_tomar(request, pedido_id):
@@ -684,6 +692,35 @@ def repartidor_aceptar(request, pedido_id):
     pedido.save()
     messages.success(request, f"Has aceptado el pedido #{pedido.id}.")
     return redirect("repartidor_panel")
+
+@login_required
+def repartidor_ver_pedido_actual(request):
+    if not es_repartidor(request.user):
+        return HttpResponseForbidden("Solo repartidores")
+    try:
+        repartidor_instance = Repartidor.objects.get(user=request.user)
+    except Repartidor.DoesNotExist:
+        messages.error(request, "Tu perfil de repartidor no está completo o no existe.")
+        return redirect('repartidor_panel')
+    try:
+        pedido = Pedido.objects.get(
+            repartidor=repartidor_instance,
+            estado="EN_CAMINO"
+        )
+    except Pedido.DoesNotExist:
+        messages.warning(request, "No tienes una entrega activa asignada. Vuelve al panel para tomar una.")
+        return redirect('repartidor_panel')
+
+    context = {
+        'pedido': pedido.pk,
+        'repartidor': repartidor_instance,
+        'origen':pedido.farmacia.direccion,
+        'destino':pedido.direccion,
+        'total':pedido.total,
+        
+    }
+
+    return render(request, 'repartidor/ver_pedido_actual.html', context)
 
 #---------------------pedido----------------
 
