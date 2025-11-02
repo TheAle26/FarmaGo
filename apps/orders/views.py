@@ -712,7 +712,7 @@ def repartidor_ver_pedido_actual(request):
         return redirect('repartidor_panel')
 
     context = {
-        'pedido': pedido.pk,
+        'pedido': pedido,
         'repartidor': repartidor_instance,
         'origen':pedido.farmacia.direccion,
         'destino':pedido.direccion,
