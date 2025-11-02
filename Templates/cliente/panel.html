@@ -25,7 +25,8 @@
             <div class="mt-1">{{ p.detalles }}</div>
           {% endif %}
         </div>
-        <span class="badge
+        <div class="d-flex flex-column align-items-end">
+          <span class="badge
           {% if p.estado == 'PENDIENTE' %} text-bg-secondary
           {% elif p.estado == 'ACEPTADO' %} text-bg-info
           {% elif p.estado == 'EN_CAMINO' %} text-bg-warning
@@ -35,7 +36,9 @@
           {% endif %}
         align-self-center">
           {{ p.estado }}
-        </span>
+          </span>
+          <a class="btn btn-sm btn-outline-primary mt-2" href="{% url 'cliente_ver_pedido' p.id %}">Ver detalles</a>
+        </div>
       </div>
     {% endfor %}
   </div>
