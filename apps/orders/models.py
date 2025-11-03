@@ -101,7 +101,15 @@ class Pedido(models.Model):
         ('PROBLEMAS_OPERATIVOS', 'Problemas operativos'),
         ('OTRO', 'Otro'),
     ]
-
+    
+    METODO_EFECTIVO = 'efectivo'
+    METODO_TRANSFERENCIA = 'transferencia'
+    METODO_PAGO_CHOICES = [
+        (METODO_EFECTIVO, 'Efectivo'),
+        (METODO_TRANSFERENCIA, 'Transferencia'),
+    ]
+    
+    
     # El cliente SÍ es el User base
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="pedidos_cliente")
     
@@ -136,6 +144,13 @@ class Pedido(models.Model):
 
     codigo_seguridad = models.CharField(max_length=6, default=generar_codigo_numerico, help_text="Código de seguridad para entrega")
 
+
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default=METODO_EFECTIVO # Default a 'efectivo'
+    )
+    
     def __str__(self):
         return f"Pedido #{self.id} - Estado: {self.get_estado_display()}"
     

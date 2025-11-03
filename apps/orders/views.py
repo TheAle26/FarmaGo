@@ -365,7 +365,7 @@ def finalizar_compra_view(request):
         del request.session['carrito']
         request.session.modified = True
         
-        messages.success(request, f"Se generaron {len(pedidos_creados)} pedidos correctamente.")
+        messages.success(request, f"Pedido confirmado. Se generaron {len(pedidos_creados)} pedidos correctamente.")
         return redirect('cliente_panel')
 
     except Exception as e:
@@ -662,7 +662,7 @@ def repartidor_panel(request):
     if not es_repartidor(request.user): return HttpResponseForbidden("Solo repartidores")
     disponibles = Pedido.objects.filter(estado="ACEPTADO", repartidor__isnull=True)
     # Usar la instancia `Repartidor` asociada al user
-    mis = Pedido.objects.filter(repartidor=request.user.repartidor).exclude(estado__in=["ENTREGADO","RECHAZADO"])
+    mis = Pedido.objects.filter(repartidor=request.user.repartidor).exclude(estado__in=["ENTREGADO"])
 
     repartidor_instance = Repartidor.objects.get(user=request.user)
 
