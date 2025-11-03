@@ -1,19 +1,19 @@
 En qué se estuvo trabajando el equipo? 
 Alejo(SM): Crear el Carrito, ver items de carrito y agregar items al carrito. Ver problemas del path
-Amalia	 : Aceptar y rechazar pedidos la farmacia. Ver con SM el problema del path
-Ezequiel : Aceptar pedido y ver pedido actual del repartidor
+Amalia	 : Aceptar y rechazar pedidos como farmacia
+Ezequiel : Funcion de aceptar un pedido como repartidor y ver pedido actual. 
 Mateo	 : Ver pedidos entrantes de la farmacia
 
 Que problemas se presentaron?
-Alejo(SM): Falta de datos para testear, creo CVS y una funcion para cargar la base de datos
-Amalia	 : 
-Ezequiel : 
-Mateo	 : 
+Alejo(SM): Faltaban de datos para testear, creo CVS y una funcion para cargar la base de datos de ejemplos
+Amalia	 : Ningún problema
+Ezequiel : Ningun problema me imposibilito trabajar.
+Mateo	 : Ningun problema mayor
 
 En qué se va a trabajar posteriormente?
 
 Alejo(SM): Eliminar items del carrito y hacer compras
-Amalia	 : 
+Amalia	 : Emprolijar codigo
 Ezequiel : Actualizar estado del pedido actual del repartidor
 Mateo	 : Ver estado del pedido como cliente
 

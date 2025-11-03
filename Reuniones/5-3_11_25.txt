@@ -1,0 +1,19 @@
+En qué se estuvo trabajando el equipo? 
+Alejo(SM): Eliminar items del carrito y hacer compras
+Amalia	 : Emprolijar codigo
+Ezequiel : Bastante mal. EL hizo la parte de ver pedido actual del repartidor, no llego a hacer la actualizacion. 
+Mateo	 : Ver estado del pedido como cliente sin problema
+
+Que problemas se presentaron?
+Alejo(SM): Falta de campo metodo de pago en el pedido
+Amalia	 : Sin problema
+Ezequiel : falta del campo codigo de pedido para el pedido
+Mateo	 : Sin problema
+
+En qué se va a trabajar posteriormente?
+
+Alejo(SM): Ver el problema del metodo de pago y agregarlo a las vistas
+Amalia	 : Hacer que la interfaz quede mas amigable
+Ezequiel : Actualizar estado del pedido como repartidor
+Mateo	 : Actualizar estado del pedido como repartidor 
+

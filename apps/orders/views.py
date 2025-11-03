@@ -355,9 +355,9 @@ def finalizar_compra_view(request):
                 )
                 
 
-                # (Descuento de Stock)
-                stock.stock_actual = F('stock_actual') - item_data['cantidad']
-                stock.save(update_fields=['stock_actual'])
+                # # (Descuento de Stock)
+                # stock.stock_actual = F('stock_actual') - item_data['cantidad']
+                # stock.save(update_fields=['stock_actual'])
 
             pedidos_creados.append(nuevo_pedido.id)
 
