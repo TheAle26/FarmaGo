@@ -33,15 +33,14 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="d-flex flex-column align-items-end gap-2">
                             <div>Total: <strong>${{ p.total }}</strong></div>
                             {% if p.estado == 'PENDIENTE' %}
-                                <form action="{% url 'farmacia_aceptar' p.id %}" method="post" class="d-inline form-aceptar" id="form-aceptar-{{ p.id }}">
+                                <form action="{% url 'farmacia_aceptar' p.id %}" method="post" class="form-aceptar" id="form-aceptar-{{ p.id }}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm btn-aceptar"
-                                    disabled>Aceptar</button>
+                                    <button type="submit" class="btn btn-success btn-sm btn-aceptar" disabled>Aceptar</button>
                                 </form>
-                                <button class="btn btn-danger btn-sm mt-2"
+                                <button class="btn btn-danger btn-sm"
                                         type="button"
                                         data-bs-toggle="collapse"
                                         data-bs-target="#rechazoForm_{{ p.id }}"
@@ -73,7 +72,7 @@
                                                     placeholder="Especificá el motivo…"></textarea>
                                         </div>
                                         <div class="col-12">
-                                        <button class="btn btn-outline-danger btn-sm mt-2" type="submit">Confirmar rechazo</button>
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">Confirmar rechazo</button>
                                         </div>
                                     </div>
                                     </form>
