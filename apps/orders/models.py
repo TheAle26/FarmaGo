@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings 
 from apps.accounts.models import Farmacia,Repartidor,Cliente
+import random 
 
 
 
@@ -80,6 +81,10 @@ class StockMedicamento(models.Model):
      
 
 
+def generar_codigo_numerico(k=6):
+    """Genera un código de 6 dígitos numéricos aleatorios."""
+    return str(random.randint(10**(k-1), 10**k - 1))
+
 class Pedido(models.Model):
     ESTADOS = [
         ('PENDIENTE','Pendiente'),
@@ -128,6 +133,9 @@ class Pedido(models.Model):
     # Es útil tener un total en el pedido principal
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     direccion = models.CharField(max_length=255)
+
+    codigo_seguridad = models.CharField(max_length=6, default=generar_codigo_numerico, help_text="Código de seguridad para entrega")
+
     def __str__(self):
         return f"Pedido #{self.id} - Estado: {self.get_estado_display()}"
     
