@@ -12,7 +12,7 @@
   <div class="d-flex justify-content-center gap-3 flex-wrap">
     {% if user.is_authenticated %}
       <a href="{% url 'panel_principal' %}" class="btn btn-primary">Panel principal</a>
-      <a href="/accounts/profile/" class="btn btn-outline-primary">Ir a mi perfil</a>
+      <a href="/accounts/profile/" class="btn btn-outline-secondary">Ir a mi perfil</a>
       <form action="{% url 'logout' %}" method="post" class="d-inline">
         {% csrf_token %}
         <button type="submit" class="btn btn-outline-secondary">Salir</button>

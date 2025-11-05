@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% load crispy_forms_tags %} {% block content %}
-<div class="mx-auto" style="max-width: 420px">
+<div class="mx-auto" style="max-width: 500px">
   <div class="card shadow-sm">
     <div class="card-body">
       <h1 class="h5 mb-3 text-center">{{ titulo }}</h1>
@@ -16,18 +16,19 @@
         <!-- RENDERIZA LOS CAMPOS OCULTOS -->
         {{ form.latitud }}
         {{ form.longitud }}
+        <div class="text-center mt-3" style="margin-bottom: 20px;">
+          <a href="{% url 'tyc' %}" target="_blank" rel="noopener noreferrer" id="tyc">
+              Ver terminos y condiciones
+          </a>
+        </div>
 
         <button class="btn btn-primary w-100" type="submit">
           Crear cuenta
         </button>
       </form>
+      
       <div class="text-center mt-3">
-          <a href="{% url 'tyc' %}" target="_blank" rel="noopener noreferrer">
-              Ver terminos y condiciones
-          </a>
-      </div>
-      <div class="text-center mt-3">
-        <a href="{% url 'registro_selector' %}">Volver a elegir tipo</a>
+        <a href="{% url 'registro_selector' %}" class="btn btn-secondary w-50 mt-2" >Volver a elegir tipo</a>
       </div>
     </div>
   </div>
