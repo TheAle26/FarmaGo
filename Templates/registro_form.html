@@ -32,6 +32,11 @@
     </div>
   </div>
 </div>
+
+<script>
+    document.title = document.title + " | {{ titulo }}";
+</script>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -130,4 +135,9 @@
     enforceDigitsOnly(cbuInput, 22);
   });
 </script>
+
+<script>
+    document.title = document.title + " | Registro";
+</script>
+
 {% endblock %}
