@@ -51,7 +51,7 @@
                             </div>
 
                             {% if item.stock_obj.medicamento.requiere_receta %}
-                                <div class="mt-3 p-2 alert alert-warning">
+                                <div class="mt-3 p-2" style="background-color:var(--farmago-light-primary);">
                                     <input type="file" 
                                            class="form-control form-control-sm" 
                                            name="receta_{{ item.stock_obj.id }}" 

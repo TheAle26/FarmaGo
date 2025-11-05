@@ -22,7 +22,6 @@
   --farmago-light-primary: #DCF7F9;
   --farmago-secondary: #0A716F;
   --farmago-dark-secondary: #074B4A;
-  --farmago-fondo: #F8FFE5;
   --farmago-blue1: #0E34A0;
   --farmago-dark-blue1: #0A2571;
   --farmago-blue2: #091540;
@@ -161,4 +160,44 @@ body {
 }
 #tyc:hover {
   color: var(--farmago-dark-secondary) !important; /* opcional: efecto hover */
+}
+
+/* Botón Carrito*/
+.cart-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--farmago-secondary);
+  border-radius: 8px;
+  padding: 4px 10px;
+  text-decoration: none;
+  color: var(--farmago-secondary);
+  background-color: #fff;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.cart-button:hover {
+  background-color: var(--farmago-light-primary);
+  border-color: #aaa;
+  text-decoration: none;
+}
+
+.cart-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--farmago-primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+.cart-text {
+  font-size: 0.9rem;
+  margin-left: 4px;
 }
