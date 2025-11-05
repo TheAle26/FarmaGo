@@ -14,3 +14,107 @@
         border-radius: 0; /* Opcional: elimina las esquinas redondeadas */
     }
 }
+
+/* 1. Define tus colores personalizados de FarmaGo en la raíz */ /*  */
+:root {
+  --farmago-primary: #23A5A9;
+  --farmago-dark-primary: #1F9498;
+  --farmago-light-primary: #DCF7F9;
+  --farmago-secondary: #0A716F;
+  --farmago-dark-secondary: #074B4A;
+  --farmago-fondo: #F8FFE5;
+  --farmago-blue1: #0E34A0;
+  --farmago-dark-blue1: #0A2571;
+  --farmago-blue2: #091540;
+  --farmago-dark-blue2: #050C24;
+  --farmago-light-gray: #F8FFE5;
+  --farmago-dark-gray: #424242;
+}
+
+/* 2. Sobrescribe las variables de color de Bootstrap */
+:root {
+  /* Color Primario (Botones, links, navbar) */
+  --bs-primary: var(--farmago-primary);
+  --bs-primary-rgb: 77, 182, 172; /* Versión RGB del teal para opacidad */
+
+  /* Color de fondo claro */
+  --bs-light: var(--farmago-light-gray);
+  --bs-light-rgb: 224, 224, 224;
+
+  /* Color del texto principal */
+  --bs-body-color: var(--farmago-dark-gray);
+  
+  /* (Opcional) Sobrescribir el color "Success" */
+  --bs-success: var(--farmago-primary); 
+  --bs-success-rgb: 77, 182, 172;
+}
+
+/* BOTONES */
+.btn-primary {
+  /* estado normal */
+  --bs-btn-bg: var(--farmago-primary);
+  --bs-btn-border-color: var(--farmago-primary);
+  --bs-btn-color: #fff;
+
+  /* hover */
+  --bs-btn-hover-bg: var(--farmago-dark-primary);
+  --bs-btn-hover-border-color: var(--farmago-dark-primary);
+  --bs-btn-hover-color: #fff;
+
+  /* active / pressed */
+  --bs-btn-active-bg: var(--farmago-dark-primary);
+  --bs-btn-active-border-color: var(--farmago-dark-primary);
+  --bs-btn-active-color: #fff;
+
+  /* focus ring (opcional, para que combine) */
+  --bs-btn-focus-shadow-rgb: 38, 187, 192; /* rgb de #26BBC0 */
+}
+
+.btn-info {
+  /* estado normal */
+  --bs-btn-bg: var(--farmago-secondary);
+  --bs-btn-border-color: var(--farmago-secondary);
+  --bs-btn-color: #fff;
+
+  /* hover */
+  --bs-btn-hover-bg: var(--farmago-dark-secondary);
+  --bs-btn-hover-border-color: var(--farmago-dark-secondary);
+  --bs-btn-hover-color: #fff;
+
+  /* active / pressed */
+  --bs-btn-active-bg: var(--farmago-dark-secondary);
+  --bs-btn-active-border-color: var(--farmago-dark-secondary);
+  --bs-btn-active-color: #fff;
+
+  /* focus ring (opcional, para que combine) */
+  --bs-btn-focus-shadow-rgb: 38, 187, 192; /* rgb de #26BBC0 */
+}
+
+/* ALERTAS */
+.alert-info {
+  background-color: var(--farmago-light-primary);
+  color: var(--farmago-secondary);
+}
+
+body {
+  font-family: 'Roboto', sans-serif; /* Elegir una tipografía más moderna */
+}
+
+.card {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Añadir sombras sutiles */
+  border: none;
+}
+
+
+
+/*Inventario Farmacia*/
+#tabla-inventario thead,
+#tabla-inventario thead th {
+  background-color: var(--farmago-light-primary) !important;
+  color: var(--farmago-dark-gray);
+}
+
+.table-hover#tabla-inventario > tbody > tr:hover > * {
+  background-color: var(--farmago-light-primary) !important;
+}
+
