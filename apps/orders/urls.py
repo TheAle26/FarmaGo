@@ -25,6 +25,7 @@ urlpatterns = [
     path("repartidor/pedidos/", views.repartidor_ver_pedidos, name="repartidor_pedidos"),
     path("repartidor/tomar/<int:pedido_id>/", views.repartidor_tomar, name="repartidor_tomar"),
     path("repartidor/entregado/<int:pedido_id>/", views.repartidor_entregado, name="repartidor_entregado"),
+    path("repartidor/entregar/<int:pedido_id>/", views.repartidor_entregar_pedido, name="repartidor_entregar_pedido"),
     path("repartidor/aceptar/<int:pedido_id>/", views.repartidor_aceptar, name="repartidor_aceptar"),
     path("repartidor/pedido_actual/", views.repartidor_ver_pedido_actual, name="repartidor_ver_pedido_actual"),
     

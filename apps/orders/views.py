@@ -769,6 +769,46 @@ def repartidor_ver_pedido_actual(request):
 
     return render(request, 'repartidor/ver_pedido_actual.html', context)
 
+
+@login_required
+def repartidor_entregar_pedido(request, pedido_id):
+    """Marca el pedido como ENTREGADO y libera al repartidor.
+
+    Requisitos:
+    - Solo POST
+    - Usuario debe ser repartidor
+    - El pedido debe estar asignado al repartidor y en estado EN_CAMINO
+    """
+    if request.method != 'POST':
+        return redirect('repartidor_panel')
+
+    if not es_repartidor(request.user):
+        return HttpResponseForbidden("Solo repartidores")
+
+    try:
+        repartidor_instance = Repartidor.objects.get(user=request.user)
+    except Repartidor.DoesNotExist:
+        messages.error(request, "Tu perfil de repartidor no está completo o no existe.")
+        return redirect('repartidor_panel')
+
+    try:
+        pedido = Pedido.objects.get(pk=pedido_id, repartidor=repartidor_instance, estado='EN_CAMINO')
+    except Pedido.DoesNotExist:
+        messages.error(request, "No tienes un pedido en curso con ese ID.")
+        return redirect('repartidor_panel')
+
+    # Marcar como entregado y liberar repartidor
+    pedido.estado = 'ENTREGADO'
+    pedido.save()
+
+    repartidor_instance.disponible = True
+    repartidor_instance.save()
+
+    messages.success(request, f"Has marcado el pedido #{pedido.id} como entregado.")
+    return redirect('repartidor_panel')
+
+
+
 #---------------------pedido----------------
 
 

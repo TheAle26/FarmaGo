@@ -40,9 +40,10 @@
                     <p class="text-muted small">Tiempo estimado: XX minutos</p>
                     
                     <div class="mt-4 text-center">
-                        <a href="{% url 'repartidor_ver_pedido_actual' %}" class="btn btn-lg btn-success">
-                            Marcar como ENTREGADO
-                        </a>
+                        <form action="{% url 'repartidor_entregar_pedido' pedido.id %}" method="post" onsubmit="return confirm('Confirmar la entrega del pedido?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-lg btn-success">Marcar como ENTREGADO</button>
+                        </form>
                     </div>
                 </div>
             </div>
