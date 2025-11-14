@@ -142,3 +142,39 @@
 </script>
 
 {% endblock %}
+
+{% block extra_js_bottom %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const vehiculoEl = document.querySelector('select[name="vehiculo"]') || document.getElementById('id_vehiculo');
+  const patenteEl = document.querySelector('input[name="patente"]') || document.getElementById('id_patente');
+  if (!vehiculoEl || !patenteEl) return;
+
+  // intenta encontrar el contenedor del campo para ocultarlo visualmente
+  const patenteWrapper = patenteEl.closest('.mb-3') || patenteEl.closest('.form-group') || patenteEl.parentElement;
+
+  function showPatente(show) {
+    if (show) {
+      patenteEl.disabled = false;
+      patenteEl.required = true;
+      if (patenteWrapper) patenteWrapper.style.display = '';
+    } else {
+      patenteEl.value = '';
+      patenteEl.disabled = true;
+      patenteEl.required = false;
+      if (patenteWrapper) patenteWrapper.style.display = 'none';
+    }
+  }
+
+  function update() {
+    const v = String(vehiculoEl.value).toLowerCase();
+    // mostrar patente SOLO si es auto o moto
+    showPatente(v === 'auto' || v === 'moto');
+  }
+
+  // inicializar y escuchar cambios
+  update();
+  vehiculoEl.addEventListener('change', update);
+});
+</script>
+{% endblock %}
