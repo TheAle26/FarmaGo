@@ -17,22 +17,47 @@ DATA_DIR = os.path.join(settings.BASE_DIR, 'data')
 class Command(BaseCommand):
     help = 'Carga datos de prueba (seed data) desde archivos CSV'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--only', type=str, help='Cargar solo uno o varios datasets (coma-separados). Ej: --only=medicamentos or --only=medicamentos,stock')
+
     @transaction.atomic
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('Iniciando carga de datos...'))
 
-        # El orden es crucial debido a las Foreign Keys
-        self.load_users()
-        self.load_obras_sociales()
-        self.load_medicamentos()
-        self.load_clientes()
-        self.load_farmacias()
-        self.load_repartidores()
-        self.load_stock()
-        self.load_pedidos()
-        self.load_detalles()
-        self.load_farmacia_obras_sociales()
-        
+        # Map keys a métodos
+        steps_map = {
+            'users': self.load_users,
+            'obras_sociales': self.load_obras_sociales,
+            'medicamentos': self.load_medicamentos,
+            'clientes': self.load_clientes,
+            'farmacias': self.load_farmacias,
+            'repartidores': self.load_repartidores,
+            'stock': self.load_stock,
+            'pedidos': self.load_pedidos,
+            'detalles': self.load_detalles,
+            'farmacia_obras_sociales': self.load_farmacia_obras_sociales,
+        }
+
+        # Orden por defecto (para mantener dependencias FK)
+        default_order = [
+            'users', 'obras_sociales', 'medicamentos', 'clientes', 'farmacias',
+            'repartidores', 'stock', 'pedidos', 'detalles', 'farmacia_obras_sociales'
+        ]
+
+        only = options.get('only')
+        if only:
+            requested = [s.strip() for s in only.split(',') if s.strip()]
+            # validar
+            invalid = [s for s in requested if s not in steps_map]
+            if invalid:
+                self.stderr.write(self.style.ERROR(f'Clave(s) inválida(s): {invalid}. Opciones válidas: {list(steps_map.keys())}'))
+                return
+            order = [s for s in default_order if s in requested]
+        else:
+            order = default_order
+
+        for key in order:
+            steps_map[key]()
 
         self.stdout.write(self.style.SUCCESS('¡Carga de datos completada!'))
 

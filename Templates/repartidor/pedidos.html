@@ -16,7 +16,7 @@
             <div class="text-muted">Farmacia: {% if p.farmacia %}{{ p.farmacia.nombre }}{% else %}--{% endif %}</div>
             <div class="text-muted">Direccion Farmacia: {% if p.farmacia %}{{ p.farmacia.direccion }}{% else %}--{% endif %}</div>
             <div class="text-muted">Cliente: {% if p.cliente %}{{ p.cliente.user.email }}{% else %}--{% endif %}</div>
-            <div class="text-muted">Direccion Entrega: {{ p.direccion_entrega }}</div>
+            <div class="text-muted">Direccion Entrega: {% if p.direccion %}{{ p.direccion }}{% elif p.direccion_entrega %}{{ p.direccion_entrega }}{% else %}--{% endif %}</div>
             <div class="text-muted">Creado: {{ p.creado|date:"d/m/Y H:i" }}</div>
             <div class="small mt-2">Total: ${{ p.total }}</div>
           </div>
