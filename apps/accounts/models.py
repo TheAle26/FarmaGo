@@ -125,11 +125,11 @@ class Repartidor(models.Model):
     cbu = models.CharField(max_length=22, default='000000000000000000000')
     vehiculo = models.CharField(max_length=20, choices=VEHICULO_CHOICES)
     patente = models.CharField(max_length=7, null=True, blank=True)
-    antecedentes = models.ImageField(
+    antecedentes = models.FileField(
         upload_to='antecedentes_repartidores/',
         null=False,
         blank=False,
-        help_text='Foto de los antecedentes penales (JPEG/PNG).'
+        help_text='Documento de antecedentes (JPG, PNG o PDF).'
     )
     disponible = models.BooleanField(default=True)
     valido = models.BooleanField(default=False)

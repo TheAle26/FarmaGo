@@ -99,10 +99,10 @@ class RegistroRepartidorForm(BaseRegistroForm):
                           widget=forms.TextInput(attrs={'maxlength': 22, 'placeholder': '22 dígitos numéricos'}))
     vehiculo = forms.ChoiceField(choices=Repartidor.VEHICULO_CHOICES)
     patente = forms.CharField(max_length=7, required=False)
-    antecedentes = forms.ImageField(
+    antecedentes = forms.FileField(
         required=True,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), validate_file_size],
-        help_text='Foto (JPG/PNG), máximo 5 MB.'
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf']), validate_file_size],
+        help_text='Archivo (JPG/PNG/PDF), máximo 5 MB.'
     )
 
     class Meta(BaseRegistroForm.Meta):
