@@ -104,6 +104,11 @@ class RegistroRepartidorForm(BaseRegistroForm):
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf']), validate_file_size],
         help_text='Archivo (JPG/PNG/PDF), máximo 5 MB.'
     )
+    acepta_tyc = forms.BooleanField(
+        label="Acepto los términos y condiciones",
+        required=True,
+        error_messages={'required': 'Debes aceptar los términos y condiciones para registrarte.'}
+    )
 
     class Meta(BaseRegistroForm.Meta):
         fields = BaseRegistroForm.Meta.fields + [
@@ -114,6 +119,7 @@ class RegistroRepartidorForm(BaseRegistroForm):
             "vehiculo",
             "patente",
             "antecedentes",
+            "acepta_tyc",
         ]
 
     def clean_cuit(self):
