@@ -349,7 +349,14 @@ def finalizar_compra_view(request):
                     
                     receta_para_adjuntar = receta_file
 
-
+                nuevo_pedido = Pedido.objects.create(
+                cliente=cliente_profile,
+                farmacia=farmacia_obj,
+                estado='PENDIENTE', 
+                total=farmacia_data.get('subtotal', 0),
+                direccion=direccion_validada
+                )
+                
                 DetallePedido.objects.create(
                     pedido=nuevo_pedido,
                     medicamento=stock.medicamento,
