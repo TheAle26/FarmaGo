@@ -41,6 +41,35 @@
 {% endblock %}
 
 {% block extra_js %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Función que filtra el input
+    function filterNameInput(event) {
+        // 'this' se refiere al campo (nombre o apellido)
+        const input = event.target;
+        
+        // Reemplaza cualquier carácter que NO sea (^) una letra (a-z, A-Z) o un espacio (\s)
+        // con una cadena vacía ('').
+        input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+    }
+
+    // 1. Encontrar los campos por su ID (el ID que genera Crispy Forms)
+    const nombreInput = document.getElementById('id_nombre');
+    const apellidoInput = document.getElementById('id_apellido');
+
+    // 2. Aplicar el filtro a ambos campos
+    if (nombreInput) {
+        nombreInput.addEventListener('input', filterNameInput);
+    }
+    if (apellidoInput) {
+        apellidoInput.addEventListener('input', filterNameInput);
+    }
+});
+</script>
+
+
 <script
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJjJoiU22eLqz-02a6dYUdKQbGazSlwoc&libraries=places&callback=initAutocomplete"
   async

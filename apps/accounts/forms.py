@@ -25,7 +25,7 @@ class BaseRegistroForm(UserCreationForm):
 class RegistroClienteForm(BaseRegistroForm):
     nombre = forms.CharField(max_length=30)
     apellido = forms.CharField(max_length=30)
-    documento = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
+    documento = forms.IntegerField(validators=[MinValueValidator(0)])
     edad = forms.IntegerField(validators=[MinValueValidator(18), MaxValueValidator(120)])
     direccion = forms.CharField(max_length=255)
     telefono = forms.CharField(max_length=20)
@@ -33,7 +33,23 @@ class RegistroClienteForm(BaseRegistroForm):
     
     class Meta(BaseRegistroForm.Meta):
         fields = BaseRegistroForm.Meta.fields + ["password1","password2","nombre","apellido","documento","edad","direccion", "telefono","terms_cond"]
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        # Regex: ^[...]*$
+        # ^ -> Comienzo de la cadena
+        # [a-zA-Z\s] -> Permite letras (minúsculas y mayúsculas) y espacios (\s)
+        # * -> Cero o más veces
+        # $ -> Fin de la cadena
+        if not re.match(r"^[a-zA-Z\s]*$", nombre):
+            raise ValidationError("El nombre solo puede contener letras y espacios.")
+        return nombre
 
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get('apellido')
+        if not re.match(r"^[a-zA-Z\s]*$", apellido):
+            raise ValidationError("El apellido solo puede contener letras y espacios.")
+        return apellido
+    
     # Validación personalizada para el campo 'documento'
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
@@ -88,7 +104,7 @@ class RegistroFarmaciaForm(BaseRegistroForm):
 
         if not re.match(r'^\d{2}-\d{8}-\d{1}$', cuit):
             raise ValidationError("Formato de CUIT inválido. Use XX-XXXXXXXX-X.")
-        if Farmacia.objects.filter(cuit=cuit).exists():
+        if Farmacia.objects.filter(cuit=cuit).exists() :
             raise ValidationError("Ya existe una farmacia registrada con este CUIT.")
         return cuit
 
@@ -99,12 +115,12 @@ class RegistroRepartidorForm(BaseRegistroForm):
                           widget=forms.TextInput(attrs={'maxlength': 22, 'placeholder': '22 dígitos numéricos'}))
     vehiculo = forms.ChoiceField(choices=Repartidor.VEHICULO_CHOICES)
     patente = forms.CharField(max_length=7, required=False)
-    antecedentes = forms.FileField(
+    antecedentes = forms.FileField(label="Antecedentes penales",
         required=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf']), validate_file_size],
         help_text='Archivo (JPG/PNG/PDF), máximo 5 MB.'
     )
-    acepta_tyc = forms.BooleanField(
+    acepta_tyc = forms.BooleanField( 
         label="Acepto los términos y condiciones",
         required=True,
         error_messages={'required': 'Debes aceptar los términos y condiciones para registrarte.'}
