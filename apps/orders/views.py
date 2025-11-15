@@ -316,14 +316,6 @@ def finalizar_compra_view(request):
             cliente_profile = getattr(request.user, 'cliente', None)
             if cliente_profile is None:
                 raise Exception("Debe iniciar sesión como cliente para finalizar la compra.")
-
-            nuevo_pedido = Pedido.objects.create(
-                cliente=cliente_profile,
-                farmacia=farmacia_obj,
-                estado='PENDIENTE', 
-                total=farmacia_data.get('subtotal', 0),
-                direccion=direccion_validada
-            )
             
             # Iterar sobre los items de la sesión
             for item_id, item_data in farmacia_data['items'].items():
