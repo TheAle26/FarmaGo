@@ -169,8 +169,12 @@ def update_cart_item(request, stock_id_str):
         if not carrito:
             return redirect('ver_carrito')
 
-        if cantidad <= 0:
+        if cantidad == 0:
             return remove_cart_item(request, stock_id_str)
+        
+        if cantidad < 0:
+            messages.error(request, "Cantidad inválida.")
+            return redirect('ver_carrito')
 
         item_encontrado = False
         for f_id, f_data in carrito['farmacias'].items():
@@ -477,8 +481,10 @@ def farmacia_pedidos_entrantes(request):
 
     pedidos_ordenados = todos_los_pedidos.annotate(
         prioridad_estado=Case(
-            When(estado="PENDIENTE", then=0), # Los PENDIENTE van primero
-            default=1 # El resto va después
+            When(estado="PENDIENTE", then=0),
+            When(estado="ACEPTADO", then=1),
+            When(estado="EN_CAMINO", then=2),# Los PENDIENTE van primero
+            default=3 # El resto va después
         )
     ).order_by('prioridad_estado', 'creado') # Ordena por prioridad, y luego por fecha
 

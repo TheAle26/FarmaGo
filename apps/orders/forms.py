@@ -15,7 +15,7 @@ class AddStockMedicamentoForm(forms.Form):
         empty_label="Seleccione un medicamento..."
     )
     precio = forms.DecimalField(
-        max_digits=10,
+        
         decimal_places=2,
         label="Precio de Venta ($)",
         validators=[MinValueValidator(decimal.Decimal('0.01'))], # Precio debe ser positivo
@@ -40,7 +40,7 @@ class AddStockMedicamentoForm(forms.Form):
 class EditStockMedicamentoForm(forms.ModelForm):
     """Formulario para editar precio y stock de un medicamento existente en el inventario."""
     precio = forms.DecimalField(
-        max_digits=10,
+        
         decimal_places=2,
         label="Nuevo Precio ($)",
         validators=[MinValueValidator(decimal.Decimal('0.01'))],

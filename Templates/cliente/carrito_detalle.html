@@ -8,8 +8,13 @@
         {% csrf_token %}
 
         {% for farmacia_data in carrito_data.farmacias %}
+            <h3 class="h5 mb-0">
+            Pedido a: 
+            <strong class="ms-1">{{ farmacia_data.nombre_farmacia }}</strong>
+            </h3>
+            <h4></h4>
             <div class="card mb-3">
-                {{ farmacia_data.nombre}}
+                
                 <ul class="list-group list-group-flush">
                     {% for item in farmacia_data.items_enriquecidos %}
                         <li class="list-group-item">
@@ -119,3 +124,37 @@
 </script>
 
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Selecciona TODOS los inputs de cantidad
+    // (Selecciona inputs cuyo 'name' COMIENZA CON "cantidad-")
+    const cantidadInputs = document.querySelectorAll('input[name^="cantidad-"]');
+
+    // 2. Añade un "escuchador" a cada uno
+    cantidadInputs.forEach(input => {
+        input.addEventListener('keydown', function (event) {
+            
+            // 3. Comprueba si la tecla presionada es "Enter"
+            if (event.key === 'Enter') {
+                
+                // 4. PREVIENE que el formulario principal se envíe
+                event.preventDefault();
+
+                // 5. Busca el botón "Actualizar" que es hermano de este input
+                // (Asume que el botón es el siguiente elemento después del input)
+                const updateButton = this.nextElementSibling;
+
+                if (updateButton && updateButton.type === 'submit') {
+                    // 6. "Hace clic" en el botón de Actualizar
+                    updateButton.click();
+                } else {
+                    console.warn('No se pudo encontrar el botón de actualizar para este input.');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock extra_js %}

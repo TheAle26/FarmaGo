@@ -68,7 +68,7 @@ class Command(BaseCommand):
             for row in reader:
                 # Usamos create_user para hashear la contraseña
                 User.objects.create_user(
-                    id=row['id'],
+                    #id=row['id'],
                     email=row['email'],
                     password=row['password'],
                     first_name=row['first_name'],
@@ -81,7 +81,7 @@ class Command(BaseCommand):
             reader = csv.DictReader(file)
             for row in reader:
                 Medicamento.objects.create(
-                    id=row['id'],
+                    #id=row['id'],
                     nombre_comercial=row['nombre_comercial'],
                     principio_activo=row['principio_activo'],
                     concentracion=row['concentracion'],
@@ -95,7 +95,7 @@ class Command(BaseCommand):
             for row in reader:
                 user = User.objects.get(id=row['user_id'])
                 Cliente.objects.create(
-                    id=row['id'],
+                    #id=row['id'],
                     user=user,
                     nombre=row['nombre'],
                     apellido=row['apellido'],
@@ -113,7 +113,7 @@ class Command(BaseCommand):
             for row in reader:
                 user = User.objects.get(id=row['user_id'])
                 Farmacia.objects.create(
-                    id=row['id'],
+                    #id=row['id'],
                     user=user,
                     nombre=row['nombre'],
                     direccion=row['direccion'],
@@ -132,7 +132,7 @@ class Command(BaseCommand):
                 patente_val = row['patente'] if row['patente'] else None
                 
                 Repartidor.objects.create(
-                    id=row['id'],
+                    #id=row['id'],
                     user=user,
                     cuit=row['cuit'], # <-- AÑADIDO
                     vehiculo=row['vehiculo'], # <-- VALOR CORREGIDO
@@ -171,7 +171,7 @@ class Command(BaseCommand):
                 repartidor = Repartidor.objects.get(id=row['repartidor_id']) if row.get('repartidor_id') else None
                 
                 Pedido.objects.create(
-                    id=row['id'],
+                   # id=row['id'],
                     cliente=cliente,
                     farmacia=farmacia,
                     repartidor=repartidor,
@@ -202,7 +202,7 @@ class Command(BaseCommand):
             reader = csv.DictReader(file)
             for row in reader:
                 ObraSocial.objects.create(
-                    id=row['id'],
+                    #id=row['id'],
                     nombre=row['nombre']
                 )
                 
@@ -219,7 +219,7 @@ class Command(BaseCommand):
             for row in reader:
                 # Creamos la relación usando los IDs directamente
                 ThroughModel.objects.create(
-                    id=row['id'],
+                   # id=row['id'],
                     farmacia_id=row['farmacia_id'],
                     obrasocial_id=row['obrasocial_id']
                 )

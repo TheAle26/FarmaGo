@@ -42,7 +42,12 @@
                         
                         <p class="text-muted small mb-0">
                             Principio Activo: {{ stock.medicamento.principio_activo }} <br>
-                            Vendido por: <strong>{{ stock.farmacia.nombre }}</strong>
+                            Vendido por: <strong>{{ stock.farmacia.nombre }}</strong> <br>
+                            {% if stock.medicamento.requiere_receta %}
+                            
+                                <strong class="text-primary " >Receta Necesaria</strong>
+                            
+                             {% endif %}
                         </p>
                     </div>
                     

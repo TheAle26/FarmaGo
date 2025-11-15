@@ -108,6 +108,7 @@ class RegistroRepartidorForm(BaseRegistroForm):
         label="Acepto los términos y condiciones",
         required=True,
         error_messages={'required': 'Debes aceptar los términos y condiciones para registrarte.'}
+        
     )
 
     class Meta(BaseRegistroForm.Meta):
