@@ -1,0 +1,17 @@
+Cosas que tiene la base de datos:
+
+Super User:
+	email: a@g.com
+	passwd: a
+
+Cliente: con 4 pedidos (estados: pendiente, aceptado, en_camino, entregado).
+	email: cliente@gmail.com
+	passwd: farmago123
+
+Repartidor: con un pedido asignado
+	email: repartidor@gmail.com
+	passwd: farmago123
+
+Farmacia: con casi todo los medicamentos agregados
+	email: farmacia@gmail.com
+	passwd: farmago123

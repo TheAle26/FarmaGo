@@ -108,7 +108,7 @@ class Farmacia(models.Model):
     valido = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Farmacia: {self.nombre}"
+        return f"{self.nombre}"
 
 class Repartidor(models.Model):
     VEHICULO_AUTO = 'auto'
