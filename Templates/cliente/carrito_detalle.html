@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Mi Carrito de Compras</h2>
+    <h2>Mi Carrito de Compras</h2> 
+    <a class="btn btn-primary" href="{% url 'buscar_medicamentos' %}">Buscar Medicamentos</a>
 
     <form action="{% url 'finalizar_compra' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -71,6 +72,7 @@
                 </div>
         {% empty %}
             <div class="alert alert-info" role="alert">Carrito vacío.</div>
+            
         {% endfor %}
 
         {% if total_general > 0 %}
@@ -128,29 +130,51 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Selecciona TODOS los inputs de cantidad
-    // (Selecciona inputs cuyo 'name' COMIENZA CON "cantidad-")
     const cantidadInputs = document.querySelectorAll('input[name^="cantidad-"]');
 
-    // 2. Añade un "escuchador" a cada uno
     cantidadInputs.forEach(input => {
+        
+        // --- 1. LÓGICA PROACTIVA (Evento 'input') ---
+        // Se activa mientras el usuario teclea.
+        function handleInput() {
+            const maxStock = parseInt(input.getAttribute('max'), 10);
+            const currentValue = parseInt(input.value, 10);
+            const minStock = parseInt(input.getAttribute('min'), 10);
+
+            // Si el valor es inválido, pre-cargamos el mensaje de error.
+            if (currentValue > maxStock) {
+                input.setCustomValidity('La cantidad no puede superar el stock (' + maxStock + ').');
+            } else if (currentValue < minStock) {
+                 input.setCustomValidity('La cantidad debe ser al menos ' + minStock + '.');
+            } else {
+                // ¡IMPORTANTE! Limpiar el mensaje si el valor vuelve a ser válido.
+                input.setCustomValidity(''); 
+            }
+        }
+
+        // --- 2. LÓGICA DE INTERCEPCIÓN (Evento 'invalid') ---
+        // Se activa SÓLO si el usuario intenta enviar el formulario
+        // y el navegador detecta que este campo es inválido.
+        function handleInvalid() {
+            // Este evento es nuestra "última oportunidad" para
+            // sobrescribir el mensaje del navegador.
+            // Volvemos a ejecutar la misma lógica de validación
+            // para asegurarnos de que el mensaje esté puesto.
+            handleInput();
+        }
+
+        // Asignar los "escuchadores"
+        input.addEventListener('input', handleInput); // Al teclear
+        input.addEventListener('invalid', handleInvalid); // Al intentar enviar
+        
+
+        // --- 3. LÓGICA PARA LA TECLA 'ENTER' (Se mantiene) ---
         input.addEventListener('keydown', function (event) {
-            
-            // 3. Comprueba si la tecla presionada es "Enter"
             if (event.key === 'Enter') {
-                
-                // 4. PREVIENE que el formulario principal se envíe
-                event.preventDefault();
-
-                // 5. Busca el botón "Actualizar" que es hermano de este input
-                // (Asume que el botón es el siguiente elemento después del input)
+                event.preventDefault(); 
                 const updateButton = this.nextElementSibling;
-
                 if (updateButton && updateButton.type === 'submit') {
-                    // 6. "Hace clic" en el botón de Actualizar
-                    updateButton.click();
-                } else {
-                    console.warn('No se pudo encontrar el botón de actualizar para este input.');
+                    updateButton.click(); 
                 }
             }
         });

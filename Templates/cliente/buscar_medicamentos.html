@@ -53,6 +53,14 @@
                     
                     <form action="{% url 'buscar_medicamentos' %}?{{ request.GET.urlencode }}" method="post">
                         {% csrf_token %}
+
+                        <input type="number" 
+                                               name="cantidad" 
+                                               class="form-control form-control-sm" 
+                                               value="1" 
+                                               min="1" 
+                                               max="{{ stock.stock_actual }}"
+                                               style="width: 80px;">
                         
                         <input type="hidden" name="stock_id" value="{{ stock.id }}">
                         
@@ -74,3 +82,72 @@
 </script>
 
 {% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    
+    const cantidadInputs = document.querySelectorAll('input[name="cantidad"]');
+
+    cantidadInputs.forEach(input => {
+        
+        const maxStock = parseInt(input.getAttribute('max'), 10);
+        const minStock = parseInt(input.getAttribute('min'), 10);
+
+        // --- 1. LÓGICA DE VALIDACIÓN (Muestra el mensaje mientras escribes) ---
+        function handleInputValidation() {
+            // No validamos si está vacío mientras escribe
+            if (input.value === '') {
+                input.setCustomValidity('');
+                return;
+            }
+
+            const currentValue = parseInt(input.value, 10);
+
+            if (currentValue > maxStock) {
+                input.setCustomValidity('Cantidad supera el stock (' + maxStock + ').');
+            } else if (currentValue < minStock) {
+                 input.setCustomValidity('La cantidad debe ser al menos ' + minStock + '.');
+            } else {
+                input.setCustomValidity(''); // Limpiar el mensaje si es válido
+            }
+        }
+
+        // --- 2. LÓGICA DE CORRECCIÓN (Resetea a 1 si es inválido al salir) ---
+        function handleBlurCorrection() {
+            let currentValue = parseInt(input.value, 10);
+
+            // Si está vacío (NaN) O es menor que el mínimo
+            if (isNaN(currentValue) || currentValue < minStock) {
+                input.value = minStock; // Resetea a '1'
+            }
+            
+            // Si es mayor que el máximo
+            if (currentValue > maxStock) {
+                input.value = minStock; // Resetea a '1'
+            }
+            
+            // Asegurarse de que el mensaje de error se limpie después de corregir
+            input.setCustomValidity('');
+        }
+
+        // Asignar los "escuchadores"
+        input.addEventListener('input', handleInputValidation);
+        input.addEventListener('blur', handleBlurCorrection); // <-- Se activa al salir
+        
+        // --- 3. LÓGICA PARA LA TECLA 'ENTER' (Se mantiene) ---
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+                const parentForm = this.closest('form');
+                if (parentForm) {
+                    const submitButton = parentForm.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        submitButton.click(); 
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock extra_js %}
