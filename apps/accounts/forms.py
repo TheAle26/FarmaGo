@@ -28,7 +28,7 @@ class RegistroClienteForm(BaseRegistroForm):
     documento = forms.IntegerField(validators=[MinValueValidator(0)])
     edad = forms.IntegerField(validators=[MinValueValidator(18), MaxValueValidator(120)])
     direccion = forms.CharField(max_length=255)
-    telefono = forms.CharField(max_length=20)
+    telefono = forms.IntegerField()
     terms_cond = forms.BooleanField(label="Acepto los términos y condiciones")
     
     class Meta(BaseRegistroForm.Meta):

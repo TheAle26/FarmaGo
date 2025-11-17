@@ -63,6 +63,9 @@
                                            name="receta_{{ item.stock_obj.id }}" 
                                            accept="image/*,.pdf" 
                                            required>
+                                           <div class="form-text text-muted mt-1">
+                                                Formatos aceptados: <strong>PDF, JPG, PNG</strong>.
+                                            </div>
                                 </div>
                             {% endif %}
                         </li>
@@ -181,4 +184,32 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ... (tu código anterior para cantidad/enter) ...
+
+    // --- VALIDACIÓN DE ARCHIVOS ---
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Definir extensiones permitidas
+                const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf)$/i;
+                
+                if (!allowedExtensions.exec(file.name)) {
+                    alert('Archivo no válido. Solo se permiten imágenes (JPG, PNG) o PDF.');
+                    this.value = ''; // Borra el archivo seleccionado
+                    return false;
+                }
+            }
+        });
+    });
+});
+</script>
+
 {% endblock extra_js %}

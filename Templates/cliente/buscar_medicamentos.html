@@ -123,7 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // Si es mayor que el máximo
             if (currentValue > maxStock) {
-                input.value = minStock; // Resetea a '1'
+                input.setCustomValidity('Cantidad supera el stock (' + maxStock + ').');
+            } else {
+                // Si es válido, limpiamos
+                input.setCustomValidity('');
             }
             
             // Asegurarse de que el mensaje de error se limpie después de corregir

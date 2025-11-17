@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.db.models import Case, When
 from django.shortcuts import render
 from django.http import JsonResponse
+import os
 
 @login_required
 def panel_principal(request):
@@ -339,8 +340,12 @@ def finalizar_compra_view(request):
                     if not receta_file:
                         raise Exception(f"Falta adjuntar la receta para {stock.medicamento.nombre_comercial}.")
                     
-                    receta_para_adjuntar = receta_file
+                    
+                    ext = os.path.splitext(receta_file.name)[1].lower()
+                    if ext not in ['.pdf', '.jpg', '.jpeg', '.png']:
+                        raise Exception(f"El archivo de receta para {stock.medicamento.nombre_comercial} no es válido. Solo se aceptan PDF o imágenes.")
 
+                    receta_para_adjuntar = receta_file
                 nuevo_pedido = Pedido.objects.create(
                 cliente=cliente_profile,
                 farmacia=farmacia_obj,

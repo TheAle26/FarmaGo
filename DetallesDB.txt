@@ -13,5 +13,18 @@ Repartidor: con un pedido asignado
 	passwd: farmago123
 
 Farmacia: con casi todo los medicamentos agregados
+	Un pedio ya hecho
 	email: farmacia@gmail.com
 	passwd: farmago123
+
+
+Registro de farmacia
+    mail existente: farmacia@gmail.com
+    cuit existente: 20-36495484-1
+
+Registro de repartidor
+  mail existente: repartidor@gmail.com
+  cuit existente: 26-39456241-4
+
+DNI existente
+44589843
